@@ -6,17 +6,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <EditText
+        android:id="@+id/speechTextField"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:text="some text"
+        android:gravity="left"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/panel_right_padding_top_bottom"
+        android:layout_marginTop="@dimen/panel_right_padding_top_bottom"
+        android:orientation="vertical"
+        android:padding="@dimen/panel_right_padding_left_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/right_panel">
+
+
+        <ImageView
+            android:id="@+id/speechPlayBt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/panel_right_button_margin"
+            android:layout_marginBottom="@dimen/panel_right_button_margin"
+            app:srcCompat="@drawable/ic_play_arrow"
+            tools:ignore="VectorDrawableCompat" />
+
+        <ImageView
+            android:id="@+id/speechPauseBt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/panel_right_button_margin"
+            app:srcCompat="@drawable/ic_pause"
+            tools:ignore="VectorDrawableCompat" />
+
+        <ImageView
+            android:id="@+id/speechStopBt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/panel_right_button_margin"
+            app:srcCompat="@drawable/ic_stop"
+            tools:ignore="VectorDrawableCompat" />
+
+        <ImageView
+            android:id="@+id/speechPlusBt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/panel_right_button_margin"
+            app:srcCompat="@drawable/ic_plus"
+            tools:ignore="VectorDrawableCompat" />
+
+        <ImageView
+            android:id="@+id/speechMinusBt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/panel_right_button_margin"
+            app:srcCompat="@drawable/ic_minus"
+            tools:ignore="VectorDrawableCompat" />
+    </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

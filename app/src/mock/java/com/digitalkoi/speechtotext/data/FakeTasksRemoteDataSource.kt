@@ -16,7 +16,6 @@
 
 package com.digitalkoi.speechtotext.data
 
-import com.digitalkoi.speechtotext.mvi.data.SpeechDataSource
 import io.reactivex.Single
 
 /**
@@ -24,12 +23,19 @@ import io.reactivex.Single
  */
 
 object FakeTasksRemoteDataSource : SpeechDataSource {
-
   override fun getSpeech(): Single<String> {
    return Single.just("hello")
   }
 
   override fun refreshSpeech() {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun zoomIn(): Single<Float> {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun zoomOut(): Single<Float> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Dimens for right panel-->
+    <dimen name="panel_right_corners_radius_left">8dp</dimen>
+    <dimen name="panel_right_padding_left_right">8dp</dimen>
+    <dimen name="panel_right_padding_top_bottom">16dp</dimen>
+    <dimen name="panel_right_button_margin">8dp</dimen>
+
+</resources>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.digitalkoi.speechtotext.mvi.speech.SpeechActivity">
+    tools:context="com.digitalkoi.speechtotext.speech.SpeechActivity">
 
     <FrameLayout
         android:id="@+id/speechContainer"
