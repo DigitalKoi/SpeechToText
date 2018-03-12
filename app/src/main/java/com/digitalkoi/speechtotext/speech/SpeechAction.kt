@@ -8,13 +8,11 @@ import com.digitalkoi.speechtotext.mvibase.MviAction
 
 sealed class SpeechAction : MviAction {
 
-    data class SetupViewAction(
-            val fontSize: Float
-    ) : SpeechAction()
+    object LoadSpeechAction: SpeechAction()
 
-    data class LoadSpeech(
-            val forceUpdate: Boolean
-    ) : SpeechAction()
+    object GetFontSizeAction : SpeechAction()
 
-    data class FontSizeAction(val fontSize: Float) : SpeechAction()
+    object FontSizeInAction : SpeechAction()
+
+    object FontSizeOutAction : SpeechAction()
 }

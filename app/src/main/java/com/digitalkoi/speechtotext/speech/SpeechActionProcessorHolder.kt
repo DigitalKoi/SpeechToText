@@ -17,16 +17,47 @@ class SpeechActionProcessorHolder(
 ) {
 
     private val loadTextProcessor =
-            ObservableTransformer<LoadSpeech, LoadSpeechResult> { action ->
+            ObservableTransformer<LoadSpeechAction, LoadSpeechResult> { action ->
                 action.flatMap { action ->
-                    null
+                    speechRepository.getSpeech()
+                            .toObservable()
+                            .map { text -> LoadSpeechResult.Success(text) }
                 }
             }
 
-    private val fontSizeProcessor =
-            ObservableTransformer<FontSizeAction, SpeechResult.FontSizeResult> { action ->
+    private val getFontSizeProcessor =
+            ObservableTransformer<GetFontSizeAction, FontSizeResult> { action ->
                 action.flatMap {
-                    null
+                    speechRepository.getTextSize()
+                            .toObservable()
+                            .map { fontSize -> FontSizeResult.Success(fontSize) }
+                            .cast(FontSizeResult::class.java)
+                            .subscribeOn(schedulerProvider.io())
+                            .observeOn(schedulerProvider.ui())
+                }
+            }
+
+    private val fontSizeInProcessor =
+            ObservableTransformer<FontSizeInAction, FontSizeResult> { action ->
+                action.flatMap {
+                    speechRepository.zoomIn()
+                            .toObservable()
+                            .map { zoomIn -> FontSizeResult.Success(zoomIn) }
+                            .cast(FontSizeResult::class.java)
+                            .subscribeOn(schedulerProvider.io())
+                            .observeOn(schedulerProvider.ui())
+                }
+            }
+
+    private val fontSizeOutProcessor =
+            ObservableTransformer<FontSizeOutAction, FontSizeResult> { acttion ->
+                acttion.flatMap {
+                    speechRepository.zoomOut()
+                            .toObservable()
+                            .map { zoomOut -> FontSizeResult.Success(zoomOut) }
+                            .cast(FontSizeResult::class.java)
+                            .subscribeOn(schedulerProvider.io())
+                            .observeOn(schedulerProvider.ui())
                 }
             }
 
@@ -34,8 +65,10 @@ class SpeechActionProcessorHolder(
             ObservableTransformer<SpeechAction, SpeechResult> { action ->
                 action.publish { shared ->
                     Observable.merge(
-                            shared.ofType(LoadSpeech::class.java).compose(loadTextProcessor),
-                            shared.ofType(FontSizeAction::class.java).compose(fontSizeProcessor)
+                            shared.ofType(LoadSpeechAction::class.java).compose(loadTextProcessor),
+                            shared.ofType(GetFontSizeAction::class.java).compose(getFontSizeProcessor),
+                            shared.ofType(FontSizeInAction::class.java).compose(fontSizeInProcessor),
+                            shared.ofType(FontSizeOutAction::class.java).compose(fontSizeOutProcessor)
                     )
                 }
             }

@@ -16,7 +16,5 @@ sealed class SpeechResult : MviResult {
 
     sealed class FontSizeResult : SpeechResult() {
         data class Success(val fontSize: Float) : FontSizeResult()
-        data class Failure(val error: Throwable) : FontSizeResult()
-        object InFlight : FontSizeResult()
     }
 }

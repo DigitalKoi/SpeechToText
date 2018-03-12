@@ -27,7 +27,11 @@ object FakeTasksRemoteDataSource : SpeechDataSource {
    return Single.just("hello")
   }
 
-  override fun refreshSpeech() {
+  override fun changeSpeechResource() {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun getTextSize(): Single<Float> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 

@@ -17,38 +17,45 @@ class SpeechLocalDataSource private constructor(
         schedulerProvider: BaseSchedulerProvider
 ) : SpeechDataSource {
 
-    private val sharedPreferences: SharedPreferences
-    private val fontSizeDefault = 18f
+    private var sharedPreferences: SharedPreferences? = null
+
     private var fontSize: Float
     private val editor: SharedPreferences.Editor
 
     init {
-        sharedPreferences =
-                context.getSharedPreferences(Constants.APP_SETTINGS, Context.MODE_PRIVATE)!!
-        fontSize =
-                sharedPreferences.getFloat(Constants.FONT_SIZE_SHARED_PREFERENCES, fontSizeDefault)
-        editor = sharedPreferences.edit()
+        sharedPreferences = context.getSharedPreferences(Constants.APP_SETTINGS, Context.MODE_PRIVATE)
+        fontSize = sharedPreferences!!.getFloat(Constants.FONT_SIZE_SHARED_PREFERENCES, Constants.DEFAULT_FONT_SIZE)
+        editor = sharedPreferences!!.edit()
     }
+
 
     override fun getSpeech(): Single<String> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun refreshSpeech() {
+    override fun changeSpeechResource() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun zoomIn(): Single<Float> {
-        fontSize += 2f
-        editor.putFloat(Constants.FONT_SIZE_SHARED_PREFERENCES, fontSize)
-        editor.apply()
+        if (fontSize <= Constants.MAXIMUM_FONT_SIZE) {
+            fontSize += 2f
+            editor.putFloat(Constants.FONT_SIZE_SHARED_PREFERENCES, fontSize)
+            editor.apply()
+        }
         return Single.just(fontSize)
     }
 
     override fun zoomOut(): Single<Float> {
-        fontSize -= 2
-        editor.putFloat(Constants.FONT_SIZE_SHARED_PREFERENCES, fontSize)
-        editor.apply()
+        if (fontSize >= Constants.MINIMUM_FONT_SIZE) {
+            fontSize -= 2f
+            editor.putFloat(Constants.FONT_SIZE_SHARED_PREFERENCES, fontSize)
+            editor.apply()
+        }
+        return Single.just(fontSize)
+    }
+
+    override fun getTextSize(): Single<Float> {
         return Single.just(fontSize)
     }
 

@@ -8,16 +8,13 @@ import io.reactivex.Single
 
 interface SpeechDataSource {
 
-    fun getSpeech(forceUpdate: Boolean): Single<String> {
-        if (forceUpdate) refreshSpeech()
-        return getSpeech()
-    }
-
     fun getSpeech(): Single<String>
 
-    fun refreshSpeech()
+    fun changeSpeechResource()
 
     fun zoomIn(): Single<Float>
 
     fun zoomOut(): Single<Float>
+
+    fun getTextSize(): Single<Float>
 }
