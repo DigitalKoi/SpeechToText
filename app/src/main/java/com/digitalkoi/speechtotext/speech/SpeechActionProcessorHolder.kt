@@ -16,17 +16,22 @@ class SpeechActionProcessorHolder(
         private val schedulerProvider: BaseSchedulerProvider
 ) {
 
-    private val loadTextProcessor =
-            ObservableTransformer<LoadSpeechAction, LoadSpeechResult> { action ->
-                action.flatMap { action ->
+    private val playPressedProcessor =
+            ObservableTransformer<PlayPressedAction, LoadSpeechResult> { action ->
+                action.flatMap {
                     speechRepository.getSpeech()
                             .toObservable()
                             .map { text -> LoadSpeechResult.Success(text) }
+                            .cast(LoadSpeechResult::class.java)
+                            .onErrorReturn(LoadSpeechResult::Failure)
+                            .subscribeOn(schedulerProvider.io())
+                            .observeOn(schedulerProvider.ui())
+                            .startWith(LoadSpeechResult.InFlight)
                 }
             }
 
-    private val getFontSizeProcessor =
-            ObservableTransformer<GetFontSizeAction, FontSizeResult> { action ->
+    private val fontSizeProcessor =
+            ObservableTransformer<FontSizeAction, FontSizeResult> { action ->
                 action.flatMap {
                     speechRepository.getTextSize()
                             .toObservable()
@@ -65,8 +70,8 @@ class SpeechActionProcessorHolder(
             ObservableTransformer<SpeechAction, SpeechResult> { action ->
                 action.publish { shared ->
                     Observable.merge(
-                            shared.ofType(LoadSpeechAction::class.java).compose(loadTextProcessor),
-                            shared.ofType(GetFontSizeAction::class.java).compose(getFontSizeProcessor),
+                            shared.ofType(PlayPressedAction::class.java).compose(playPressedProcessor),
+                            shared.ofType(FontSizeAction::class.java).compose(fontSizeProcessor),
                             shared.ofType(FontSizeInAction::class.java).compose(fontSizeInProcessor),
                             shared.ofType(FontSizeOutAction::class.java).compose(fontSizeOutProcessor)
                     )

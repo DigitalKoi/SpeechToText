@@ -10,11 +10,12 @@ import com.digitalkoi.speechtotext.util.Constants
 data class SpeechViewState(
         val isLoading: Boolean,
         //All about text
-        val text: String,
+        val text: String?,
         val fontSize: Float,
         val fontChanged: Boolean,
         //Id patient for saving in file
         val idPatient: String?,
+        val showIdDialog: Boolean,
         //status for recording speech:
         //0 - stop, 1 - play, 2 - pause
         val recSpeechStatus: Byte,
@@ -25,10 +26,11 @@ data class SpeechViewState(
         fun idle(): SpeechViewState {
             return SpeechViewState(
                     isLoading = false,
-                    text = "",
+                    text = null,
                     fontSize = Constants.DEFAULT_FONT_SIZE,
                     fontChanged = false,
                     idPatient = null,
+                    showIdDialog = true,
                     recSpeechStatus = 0,
                     error = null
             )

@@ -12,7 +12,7 @@
         android:layout_height="0dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="48dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:ems="10"
         android:gravity="left"
         android:inputType="textMultiLine"
@@ -20,59 +20,151 @@
         app:layout_constraintBottom_toTopOf="@+id/speechMicPause"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/speechKeyboardBt"
+        />
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="250dp"
         android:layout_marginBottom="@dimen/panel_right_padding_top_bottom"
         android:layout_marginTop="@dimen/panel_right_padding_top_bottom"
+        android:background="@drawable/shape_right_panel"
         android:orientation="vertical"
         android:padding="@dimen/panel_right_padding_left_right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/shape_right_panel">
+        >
 
 
         <ImageView
             android:id="@+id/speechPlayBt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/panel_right_button_margin"
-            android:layout_marginBottom="@dimen/panel_right_button_margin"
-            app:srcCompat="@drawable/ic_play_arrow"/>
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_play_arrow"
+            />
 
         <ImageView
             android:id="@+id/speechPauseBt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:layout_marginBottom="@dimen/panel_right_button_margin"
-            app:srcCompat="@drawable/ic_pause"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speechPlayBt"
+            app:srcCompat="@drawable/ic_pause"
+            />
 
         <ImageView
             android:id="@+id/speechStopBt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/panel_right_button_margin"
-            app:srcCompat="@drawable/ic_stop" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speechPauseBt"
+            app:srcCompat="@drawable/ic_stop"
+            />
 
         <ImageView
             android:id="@+id/speechPlusBt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/panel_right_button_margin"
-            app:srcCompat="@drawable/ic_plus" />
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speechStopBt"
+            app:srcCompat="@drawable/ic_plus"
+            />
 
         <ImageView
             android:id="@+id/speechMinusBt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/panel_right_button_margin"
-            app:srcCompat="@drawable/ic_minus" />
-    </LinearLayout>
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speechPlusBt"
+            app:srcCompat="@drawable/ic_minus"
+            />
+
+        <ImageView
+            android:id="@+id/speechPaintBt"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speechMinusBt"
+            app:srcCompat="@drawable/shape_circle_blue"
+            />
+
+        <TextView
+            android:id="@+id/textPaint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P"
+            android:textColor="@android:color/background_light"
+            app:layout_constraintBottom_toBottomOf="@+id/speechPaintBt"
+            app:layout_constraintEnd_toEndOf="@+id/speechPaintBt"
+            app:layout_constraintStart_toStartOf="@+id/speechPaintBt"
+            app:layout_constraintTop_toTopOf="@+id/speechPaintBt"
+            />
+
+        <ImageView
+            android:id="@+id/speechGoodnessBt"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textPaint"
+            app:srcCompat="@drawable/shape_circle_violet"
+            />
+
+        <TextView
+            android:id="@+id/textGoodness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="G"
+            android:textColor="@android:color/background_light"
+            app:layout_constraintBottom_toBottomOf="@+id/speechGoodnessBt"
+            app:layout_constraintEnd_toEndOf="@+id/speechPaintBt"
+            app:layout_constraintStart_toStartOf="@+id/speechPaintBt"
+            app:layout_constraintTop_toTopOf="@+id/speechGoodnessBt"
+            />
+
+        <ImageView
+            android:id="@+id/speechQuestionBt"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/speechGoodnessBt"
+            app:srcCompat="@drawable/shape_circle_pink"
+            />
+
+        <TextView
+            android:id="@+id/textQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Q"
+            android:textColor="@android:color/background_light"
+            app:layout_constraintBottom_toBottomOf="@+id/speechQuestionBt"
+            app:layout_constraintEnd_toEndOf="@+id/speechQuestionBt"
+            app:layout_constraintStart_toStartOf="@+id/speechQuestionBt"
+            app:layout_constraintTop_toTopOf="@+id/speechQuestionBt"
+            />
+    </android.support.constraint.ConstraintLayout>
 
     <ImageView
         android:id="@+id/speechMicPause"
@@ -81,11 +173,12 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/shape_pause_button" />
+        app:srcCompat="@drawable/shape_pause_button"
+        />
 
     <ImageView
         android:id="@+id/speechMicPlay"
@@ -94,20 +187,22 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/shape_play_button" />
+        app:srcCompat="@drawable/shape_play_button"
+        />
 
     <ImageView
         android:id="@+id/speechKeyboardBt"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_marginStart="42dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/speechMicPlay"
-        app:layout_constraintStart_toEndOf="@+id/speechMicPlay"
-        app:layout_constraintTop_toTopOf="@+id/speechMicPlay"
-        app:srcCompat="@drawable/ic_keyboard" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_keyboard"
+        />
 </android.support.constraint.ConstraintLayout>

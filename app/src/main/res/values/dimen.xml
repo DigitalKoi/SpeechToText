@@ -7,4 +7,6 @@
     <dimen name="panel_right_padding_top_bottom">16dp</dimen>
     <dimen name="panel_right_button_margin">8dp</dimen>
 
+    <!--Dimens for drawing view-->
+    <dimen name="paint_width">4dp</dimen>
 </resources>

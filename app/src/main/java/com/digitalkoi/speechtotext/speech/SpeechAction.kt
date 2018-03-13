@@ -8,9 +8,11 @@ import com.digitalkoi.speechtotext.mvibase.MviAction
 
 sealed class SpeechAction : MviAction {
 
-    object LoadSpeechAction: SpeechAction()
+    object PlayPressedAction: SpeechAction()
 
-    object GetFontSizeAction : SpeechAction()
+    object ShowDialogID: SpeechAction()
+
+    object FontSizeAction : SpeechAction()
 
     object FontSizeInAction : SpeechAction()
 

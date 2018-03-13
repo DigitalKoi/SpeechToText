@@ -12,6 +12,7 @@ sealed class SpeechResult : MviResult {
         data class Success(val text: String) : LoadSpeechResult()
         data class Failure(val error: Throwable) : LoadSpeechResult()
         object InFlight : LoadSpeechResult()
+        object ShowDialogId : LoadSpeechResult()
     }
 
     sealed class FontSizeResult : SpeechResult() {

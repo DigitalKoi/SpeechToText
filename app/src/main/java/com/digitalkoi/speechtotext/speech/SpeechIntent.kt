@@ -10,7 +10,7 @@ sealed class SpeechIntent : MviIntent {
 
     object InitialIntent : SpeechIntent()
 
-    object LoadTextIntent : SpeechIntent()
+    object PlayPressedIntent : SpeechIntent()
 
     object ZoomInIntent : SpeechIntent()
 

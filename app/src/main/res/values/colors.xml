@@ -7,5 +7,7 @@
 
 
     <color name="colorRightPanelBackground">#454545</color>
-    <color name="colorRightPanelButtonRed">#ffcc0000</color>
+    <color name="colorRightPanelButtonRed">#cc0000</color>
+
+    <color name="colorConfirmationView">#5E98B5</color>
 </resources>

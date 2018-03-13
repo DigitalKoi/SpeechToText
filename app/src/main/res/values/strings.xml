@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">SpeechToText</string>
+  <string name="confirm_answer">Confirm your answer please</string>
+  <string name="ok">OK</string>
+  <string name="cancel">Cancel</string>
+  <string name="enter_patient_id">Enter Patient ID</string>
 
 
 </resources>

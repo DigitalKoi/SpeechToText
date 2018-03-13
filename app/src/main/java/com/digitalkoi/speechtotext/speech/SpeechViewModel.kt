@@ -5,6 +5,7 @@ import com.digitalkoi.speechtotext.mvibase.MviViewModel
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import com.digitalkoi.speechtotext.speech.SpeechResult.*
+import com.digitalkoi.speechtotext.speech.SpeechIntent.*
 import com.digitalkoi.speechtotext.util.notOfType
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
@@ -49,10 +50,10 @@ class SpeechViewModel(
 
     private fun actionFromIntent(intent: SpeechIntent): SpeechAction {
         return when (intent) {
-            is SpeechIntent.InitialIntent -> SpeechAction.GetFontSizeAction
-            is SpeechIntent.LoadTextIntent -> SpeechAction.LoadSpeechAction
-            is SpeechIntent.ZoomInIntent -> SpeechAction.FontSizeInAction
-            is SpeechIntent.ZoomOutIntent -> SpeechAction.FontSizeOutAction
+            is InitialIntent -> SpeechAction.FontSizeAction
+            is PlayPressedIntent -> SpeechAction.ShowDialogID
+            is ZoomInIntent -> SpeechAction.FontSizeInAction
+            is ZoomOutIntent -> SpeechAction.FontSizeOutAction
         }
     }
 
@@ -64,6 +65,7 @@ class SpeechViewModel(
                     is LoadSpeechResult.InFlight -> previousState.copy(isLoading = true)
                     is LoadSpeechResult.Failure -> previousState.copy(isLoading = false, error = result.error)
                     is LoadSpeechResult.Success -> previousState.copy(isLoading = false, text = result.text)
+                    is LoadSpeechResult.ShowDialogId -> previousState.copy(isLoading = false, showIdDialog = true)
                 }
                 is FontSizeResult -> when (result) {
                     is FontSizeResult.Success -> previousState.copy(isLoading = false, fontChanged = true, fontSize = result.fontSize)
