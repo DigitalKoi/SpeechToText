@@ -5,16 +5,15 @@ import android.os.Bundle
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.util.addFragmentToActivity
 
-class SpeechActivity : AppCompatActivity(){
+class SpeechActivity : AppCompatActivity() {
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.speech_act)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.speech_act)
-
-        if (supportFragmentManager.findFragmentById(R.id.speechContainer) == null) {
-            addFragmentToActivity(supportFragmentManager, SpeechFragment(), R.id.speechContainer)
-        }
+    if (supportFragmentManager.findFragmentById(R.id.speechContainer) == null) {
+      addFragmentToActivity(supportFragmentManager, SpeechFragment(), R.id.speechContainer)
     }
+  }
 
 }

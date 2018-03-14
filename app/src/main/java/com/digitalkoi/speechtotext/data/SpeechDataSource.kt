@@ -8,13 +8,13 @@ import io.reactivex.Single
 
 interface SpeechDataSource {
 
-    fun getSpeech(): Single<String>
+  fun getSpeech(): Single<String>
 
-    fun changeSpeechResource()
+  fun changeSpeechResource()
 
-    fun zoomIn(): Single<Float>
+  fun zoomIn(): Single<Float>
 
-    fun zoomOut(): Single<Float>
+  fun zoomOut(): Single<Float>
 
-    fun getTextSize(): Single<Float>
+  fun getTextSize(): Single<Float>
 }

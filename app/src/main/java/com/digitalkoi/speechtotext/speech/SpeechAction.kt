@@ -8,13 +8,18 @@ import com.digitalkoi.speechtotext.mvibase.MviAction
 
 sealed class SpeechAction : MviAction {
 
-    object PlayPressedAction: SpeechAction()
+  data class PlayPressedAction(val statusRecord: Int) : SpeechAction()
 
-    object ShowDialogID: SpeechAction()
+  object FontSizeAction : SpeechAction()
 
-    object FontSizeAction : SpeechAction()
+  object FontSizeInAction : SpeechAction()
 
-    object FontSizeInAction : SpeechAction()
+  object FontSizeOutAction : SpeechAction()
 
-    object FontSizeOutAction : SpeechAction()
+  data class ShowDialogIdAction(val showView: Boolean) : SpeechAction()
+
+  data class ShowDialogConfirmAction(val showView: Boolean) : SpeechAction()
+
+  data class ShowKeyboardAction(val showView: Boolean) : SpeechAction()
+
 }

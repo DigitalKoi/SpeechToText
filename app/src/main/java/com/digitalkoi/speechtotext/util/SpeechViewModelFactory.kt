@@ -12,19 +12,23 @@ import com.digitalkoi.speechtotext.di.Injection
  */
 
 class SpeechViewModelFactory private constructor(
-        private val applicationContext: Context
+  private val applicationContext: Context
 ) : ViewModelProvider.Factory {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+  override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-        if (modelClass == SpeechViewModel::class.java) {
-            return SpeechViewModel(
-                    SpeechActionProcessorHolder(
-                            Injection.provideTasksRepository(applicationContext),
-                            Injection.provideSchedulerProvider())) as T
-        }
-        throw IllegalAccessException("unknown model class $modelClass")
+    if (modelClass == SpeechViewModel::class.java) {
+      return SpeechViewModel(
+          SpeechActionProcessorHolder(
+              Injection.provideTasksRepository(applicationContext),
+              Injection.provideSchedulerProvider()
+          )
+      ) as T
     }
+    throw IllegalAccessException("unknown model class $modelClass")
+  }
 
-    companion object : SingletonHolderSingleArg<SpeechViewModelFactory, Context>(::SpeechViewModelFactory)
+  companion object : SingletonHolderSingleArg<SpeechViewModelFactory, Context>(
+      ::SpeechViewModelFactory
+  )
 }

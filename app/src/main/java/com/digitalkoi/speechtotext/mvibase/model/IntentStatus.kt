@@ -5,5 +5,7 @@ package com.digitalkoi.speechtotext.mvibase.model
  */
 
 enum class IntentStatus {
-    SUCCESS, FAILURE, IN_FLIGHT
+  SUCCESS,
+  FAILURE,
+  IN_FLIGHT
 }

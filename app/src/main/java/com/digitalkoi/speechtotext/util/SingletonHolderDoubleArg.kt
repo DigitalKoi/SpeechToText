@@ -6,28 +6,31 @@ package com.digitalkoi.speechtotext.util
 
 open class SingletonHolderDoubleArg<out T, in A, in B>(creator: (A, B) -> T) {
 
-    private val creator: ((A, B) -> T)? = creator
-    @Volatile private var instance: T? = null
+  private val creator: ((A, B) -> T)? = creator
+  @Volatile private var instance: T? = null
 
-    fun getInstance(arg1: A, arg2: B): T {
-        val i = instance
-        if (i != null) {
-            return i
-        }
-
-        return synchronized(this) {
-            val i2 = instance
-            if (i2 != null) {
-                i2
-            } else {
-                val created = creator!!(arg1, arg2)
-                instance = created
-                created
-            }
-        }
+  fun getInstance(
+    arg1: A,
+    arg2: B
+  ): T {
+    val i = instance
+    if (i != null) {
+      return i
     }
 
-    fun clearInstance() {
-        instance = null
+    return synchronized(this) {
+      val i2 = instance
+      if (i2 != null) {
+        i2
+      } else {
+        val created = creator!!(arg1, arg2)
+        instance = created
+        created
+      }
     }
+  }
+
+  fun clearInstance() {
+    instance = null
+  }
 }
