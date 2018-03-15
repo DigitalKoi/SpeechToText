@@ -6,6 +6,7 @@ import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import com.digitalkoi.speechtotext.data.SpeechDataSource
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import com.digitalkoi.speechtotext.util.Constants
+import io.reactivex.Completable
 import io.reactivex.Single
 
 /**
@@ -16,10 +17,10 @@ class SpeechLocalDataSource private constructor(
   context: Context,
   schedulerProvider: BaseSchedulerProvider
 ) : SpeechDataSource {
-
   private var sharedPreferences: SharedPreferences? = null
 
   private var fontSize: Float
+
   private val editor: SharedPreferences.Editor
 
   init {
@@ -29,17 +30,19 @@ class SpeechLocalDataSource private constructor(
     )
     editor = sharedPreferences!!.edit()
   }
-
   override fun getSpeech(): Single<String> {
     TODO(
         "not implemented"
     ) //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun changeSpeechResource() {
-    TODO(
-        "not implemented"
-    ) //To change body of created functions use File | Settings | File Templates.
+  override fun saveSpeech(id: String, text: String): Completable {
+   return Completable.complete()
+  }
+
+
+  override fun changeSpeechResource(): Completable {
+    return Completable.complete()
   }
 
   override fun zoomIn(): Single<Float> {

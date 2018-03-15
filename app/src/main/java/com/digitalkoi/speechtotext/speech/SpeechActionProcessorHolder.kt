@@ -2,9 +2,6 @@ package com.digitalkoi.speechtotext.speech
 
 import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.speech.SpeechAction.*
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogConfirmIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogIdIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowKeyboardIntent
 import com.digitalkoi.speechtotext.speech.SpeechResult.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialogConfirmResult
 import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialogIdResult
@@ -33,6 +30,21 @@ class SpeechActionProcessorHolder(
             .subscribeOn(schedulerProvider.io())
             .observeOn(schedulerProvider.ui())
             .startWith(LoadSpeechResult.InFlight)
+      }
+    }
+
+  private val stopPressedProcessor =
+    ObservableTransformer<StopPressedAction, SaveSpeechResult> { action ->
+      action.flatMap {
+        speechRepository.saveSpeech()
+            .
+            .toObservable()
+            .map { SaveSpeechResult.Success }
+            .cast(SaveSpeechResult::class.java)
+            .onErrorReturn(SaveSpeechResult::Failure)
+            .subscribeOn(schedulerProvider.io())
+            .observeOn(schedulerProvider.ui())
+            .startWith(SaveSpeechResult.InFlight)
       }
     }
 
@@ -100,6 +112,7 @@ class SpeechActionProcessorHolder(
         Observable.merge(
             listOf(
                 shared.ofType(PlayPressedAction::class.java).compose(playPressedProcessor),
+                shared.ofType(StopPressedAction::class.java).compose(stopPressedProcessor),
                 shared.ofType(FontSizeAction::class.java).compose(fontSizeProcessor),
                 shared.ofType(FontSizeInAction::class.java).compose(fontSizeInProcessor),
                 shared.ofType(FontSizeOutAction::class.java).compose(fontSizeOutProcessor),

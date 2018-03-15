@@ -1,6 +1,7 @@
 package com.digitalkoi.speechtotext.data
 
 import com.digitalkoi.speechtotext.util.SingletonHolderSingleArg
+import io.reactivex.Completable
 import io.reactivex.Single
 
 /**
@@ -11,18 +12,28 @@ open class SpeechRepository private constructor(
 //        private val speechRemoteDataSource: SpeechDataSource,
   private val speechLocalDataSource: SpeechDataSource
 ) : SpeechDataSource {
-
   override fun getSpeech(): Single<String> {
     TODO(
         "not implemented"
     ) //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun changeSpeechResource() {
+  override fun saveSpeech(
+    id: String,
+    text: String
+  ): Completable {
     TODO(
         "not implemented"
     ) //To change body of created functions use File | Settings | File Templates.
   }
+
+  override fun changeSpeechResource(): Completable {
+    TODO(
+        "not implemented"
+    ) //To change body of created functions use File | Settings | File Templates.
+  }
+
+
 
   override fun getTextSize(): Single<Float> {
     return speechLocalDataSource.getTextSize()

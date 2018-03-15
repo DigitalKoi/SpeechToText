@@ -1,5 +1,6 @@
 package com.digitalkoi.speechtotext.data
 
+import io.reactivex.Completable
 import io.reactivex.Single
 
 /**
@@ -10,7 +11,9 @@ interface SpeechDataSource {
 
   fun getSpeech(): Single<String>
 
-  fun changeSpeechResource()
+  fun saveSpeech(id: String, text: String): Completable
+
+  fun changeSpeechResource(): Completable
 
   fun zoomIn(): Single<Float>
 

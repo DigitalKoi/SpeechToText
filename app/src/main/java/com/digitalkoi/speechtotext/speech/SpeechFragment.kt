@@ -10,6 +10,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlin.LazyThreadSafetyMode.NONE
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.support.v7.app.AlertDialog
@@ -20,20 +21,18 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.digitalkoi.speechtotext.R
-import com.digitalkoi.speechtotext.R.id.dialogPatientCancel
-import com.digitalkoi.speechtotext.R.id.dialogPatientOk
+import com.digitalkoi.speechtotext.drawing.DrawActivity
+import com.digitalkoi.speechtotext.speech.SpeechIntent.InitialIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.PlayPressedIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogConfirmIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogIdIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowKeyboardIntent
+import com.digitalkoi.speechtotext.speech.SpeechIntent.StopPressedIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ZoomInIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ZoomOutIntent
 import com.digitalkoi.speechtotext.util.Constants
 import com.digitalkoi.speechtotext.util.SpeechViewModelFactory
 import io.reactivex.subjects.PublishSubject
-import kotlinx.android.synthetic.main.dialog_confirmation.dialogConfirmYes
-import kotlinx.android.synthetic.main.dialog_patient_id.dialogPatientCancel
-import kotlinx.android.synthetic.main.dialog_patient_id.dialogPatientOk
 import kotlinx.android.synthetic.main.speech_frag.*
 import kotlin.properties.Delegates
 
@@ -50,12 +49,13 @@ class SpeechFragment : Fragment(),
         .of(this, SpeechViewModelFactory.getInstance(context!!))
         .get(SpeechViewModel::class.java)
   }
-  private val playPressedSubject = PublishSubject.create<SpeechIntent.PlayPressedIntent>()
-  private val zoomOutSubject = PublishSubject.create<SpeechIntent.ZoomOutIntent>()
-  private val zoomInSubject = PublishSubject.create<SpeechIntent.ZoomInIntent>()
-  private val showDialogIdSubject = PublishSubject.create<SpeechIntent.ShowDialogIdIntent>()
-  private val showDialogConfirmSubject = PublishSubject.create<SpeechIntent.ShowDialogConfirmIntent>()
-  private val showKeyboardSubject = PublishSubject.create<SpeechIntent.ShowKeyboardIntent>()
+  private val playPressedSubject = PublishSubject.create<PlayPressedIntent>()
+  private val stopPressedSubject = PublishSubject.create<StopPressedIntent>()
+  private val zoomOutSubject = PublishSubject.create<ZoomOutIntent>()
+  private val zoomInSubject = PublishSubject.create<ZoomInIntent>()
+  private val showDialogIdSubject = PublishSubject.create<ShowDialogIdIntent>()
+  private val showDialogConfirmSubject = PublishSubject.create<ShowDialogConfirmIntent>()
+  private val showKeyboardSubject = PublishSubject.create<ShowKeyboardIntent>()
 
   private lateinit var keyboardManager: InputMethodManager
   private val builder: AlertDialog.Builder by lazy { AlertDialog.Builder(activity) }
@@ -79,14 +79,14 @@ class SpeechFragment : Fragment(),
   override fun onDestroy() {
     super.onDestroy()
     disposable.dispose()
-//    dialogId.dismiss()
-//    dialogConfirm.dismiss()
+
   }
 
   override fun intents(): Observable<SpeechIntent> {
     return Observable.merge(listOf(
             initialIntent(),
-            loadTextIntent(),
+            playPressedIntent(),
+            stopPressedIntent(),
             zoomInIntent(),
             zoomOutIntent(),
             showDialogIdIntent(),
@@ -101,8 +101,10 @@ class SpeechFragment : Fragment(),
     recSpeechStatus = state.recSpeechStatus
     if (state.error != null) showToast() //return for fatal error
     speechTextField.textSize = state.fontSize
-    if (state.showDialogId) showDialogId()
-    if (state.showDialogConfirmation) showDialogConfirm()
+    if (state.showDialogId || state.showDialogConfirmation) {
+      showDialogId(state.showDialogId, state.showDialogConfirmation)
+    } else { showDialogId(false, false)
+    }
     keyboardIsOpen =
         if (state.showKeyboard) { showKeyboard(true); true }
         else { showKeyboard(false); false }
@@ -118,24 +120,26 @@ class SpeechFragment : Fragment(),
     initialClickListeners()
   }
 
-  private fun initialIntent(): Observable<SpeechIntent.InitialIntent> = Observable.just(SpeechIntent.InitialIntent)
+  private fun initialIntent(): Observable<InitialIntent> = Observable.just(InitialIntent)
+  private fun playPressedIntent(): Observable<PlayPressedIntent> = playPressedSubject
+  private fun stopPressedIntent(): Observable<StopPressedIntent> = stopPressedSubject
+  private fun zoomInIntent(): Observable<ZoomInIntent> = zoomInSubject
+  private fun zoomOutIntent(): Observable<ZoomOutIntent> = zoomOutSubject
+  private fun showDialogIdIntent(): Observable<ShowDialogIdIntent> = showDialogIdSubject
+  private fun showDialogConfirmIntent(): Observable<ShowDialogConfirmIntent> = showDialogConfirmSubject
+  private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
 
-  private fun loadTextIntent(): Observable<SpeechIntent.PlayPressedIntent> = playPressedSubject
-  private fun zoomInIntent(): Observable<SpeechIntent.ZoomInIntent> = zoomInSubject
-  private fun zoomOutIntent(): Observable<SpeechIntent.ZoomOutIntent> = zoomOutSubject
-  private fun showDialogIdIntent(): Observable<SpeechIntent.ShowDialogIdIntent> = showDialogIdSubject
-  private fun showDialogConfirmIntent(): Observable<SpeechIntent.ShowDialogConfirmIntent> = showDialogConfirmSubject
-  private fun showKeyboardIntent(): Observable<SpeechIntent.ShowKeyboardIntent> = showKeyboardSubject
+
   private fun initialClickListeners() {
     speechPlayBt.setOnClickListener {
-      if (recSpeechStatus == Constants.REC_STATUS_STOP) { showDialogId() }
+      if (recSpeechStatus == Constants.REC_STATUS_STOP) { showDialogIdSubject.onNext(ShowDialogIdIntent(true)) }
       else if (recSpeechStatus == Constants.REC_STATUS_PAUSE) { playPressedSubject.onNext(PlayPressedIntent) }
     }
     speechPauseBt.setOnClickListener { }
-    speechStopBt.setOnClickListener { }
+    speechStopBt.setOnClickListener { stopPressedSubject.onNext(StopPressedIntent(speechTextField.text)) }
     speechPlusBt.setOnClickListener { zoomInSubject.onNext(ZoomInIntent) }
     speechMinusBt.setOnClickListener { zoomOutSubject.onNext(ZoomOutIntent) }
-    speechPaintBt.setOnClickListener { }
+    speechPaintBt.setOnClickListener { showDrawActivity() }
     speechGoodnessBt.setOnClickListener { }
     speechQuestionBt.setOnClickListener { showDialogConfirmSubject.onNext(ShowDialogConfirmIntent(true)) }
     speechMicPause.setOnClickListener { }
@@ -177,21 +181,26 @@ class SpeechFragment : Fragment(),
 
   }
 
-  private fun showDialogId() {
-    if (!dialogId.isShowing)
-      dialogId.show()
+  private fun showDialogId(showDialogId: Boolean, showDialogConfirm: Boolean) {
+    when {
+      showDialogId -> dialogId.show()
+      showDialogConfirm -> dialogConfirm.show()
+      else -> {
+        dialogId.dismiss()
+        dialogConfirm.dismiss()
+      }
+    }
   }
-
-  private fun showDialogConfirm() {
-    if (!dialogConfirm.isShowing)
-      dialogConfirm.show()
-  }
-
 
   private fun showKeyboard(show: Boolean) {
     //TODO: show/hide keyboard only with button
     if (show) { keyboardManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.SHOW_IMPLICIT) }
     else { keyboardManager.hideSoftInputFromWindow(speechTextField.windowToken, 0) }
+  }
+
+  private fun showDrawActivity() {
+    val intent = Intent(context, DrawActivity::class.java)
+    startActivity(intent)
   }
 
   private fun showToast() {

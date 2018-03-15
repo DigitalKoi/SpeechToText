@@ -14,6 +14,12 @@ sealed class SpeechResult : MviResult {
     object InFlight : LoadSpeechResult()
   }
 
+  sealed class SaveSpeechResult : SpeechResult() {
+    object Success : SaveSpeechResult()
+    data class Failure(val error: Throwable) : SaveSpeechResult()
+    object InFlight : SaveSpeechResult()
+  }
+
   sealed class FontSizeResult : SpeechResult() {
     data class Success(val fontSize: Float) : FontSizeResult()
   }

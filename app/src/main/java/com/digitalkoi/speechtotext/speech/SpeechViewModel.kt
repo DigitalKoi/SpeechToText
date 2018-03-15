@@ -2,19 +2,10 @@ package com.digitalkoi.speechtotext.speech
 
 import android.arch.lifecycle.ViewModel
 import com.digitalkoi.speechtotext.mvibase.MviViewModel
-import com.digitalkoi.speechtotext.speech.SpeechIntent.InitialIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.PlayPressedIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogConfirmIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogIdIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowKeyboardIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ZoomInIntent
-import com.digitalkoi.speechtotext.speech.SpeechIntent.ZoomOutIntent
-import com.digitalkoi.speechtotext.speech.SpeechResult.FontSizeResult
-import com.digitalkoi.speechtotext.speech.SpeechResult.LoadSpeechResult
-import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult
-import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialogConfirmResult
-import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialogIdResult
-import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowKeyboardResult
+import com.digitalkoi.speechtotext.speech.SpeechAction.*
+import com.digitalkoi.speechtotext.speech.SpeechIntent.*
+import com.digitalkoi.speechtotext.speech.SpeechResult.*
+import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.*
 import com.digitalkoi.speechtotext.util.Constants
 import com.digitalkoi.speechtotext.util.notOfType
 import io.reactivex.Observable
@@ -62,8 +53,9 @@ class SpeechViewModel(
 
   private fun actionFromIntent(intent: SpeechIntent): SpeechAction {
     return when (intent) {
-      is InitialIntent -> SpeechAction.FontSizeAction
-      is PlayPressedIntent -> SpeechAction.PlayPressedAction(Constants.REC_STATUS_PLAY)
+      is InitialIntent -> FontSizeAction
+      is PlayPressedIntent -> PlayPressedAction(Constants.REC_STATUS_PLAY) //TODO: change STATUS
+      is StopPressedIntent -> StopPressedAction(Constants.REC_STATUS_STOP, intent.text)
       is ZoomInIntent -> SpeechAction.FontSizeInAction
       is ZoomOutIntent -> SpeechAction.FontSizeOutAction
       is ShowDialogIdIntent -> SpeechAction.ShowDialogIdAction(intent.showView)
@@ -81,6 +73,14 @@ class SpeechViewModel(
           is LoadSpeechResult.Failure -> previousState.copy(isLoading = false, error = result.error)
           is LoadSpeechResult.Success -> previousState.copy(isLoading = false, text = result.text)
 
+        }
+        is SaveSpeechResult -> when (result) {
+          is SaveSpeechResult.InFlight -> previousState.copy(isLoading = true)
+          is SaveSpeechResult.Failure -> previousState.copy(isLoading = false, error =  result.error)
+          is SaveSpeechResult.Success -> previousState.copy(
+              isLoading = false,
+              recSpeechStatus = Constants.REC_STATUS_STOP,
+              text = null)
         }
         is FontSizeResult -> when (result) {
           is FontSizeResult.Success -> previousState.copy(

@@ -12,6 +12,8 @@ sealed class SpeechIntent : MviIntent {
 
   object PlayPressedIntent : SpeechIntent()
 
+  data class StopPressedIntent(val text: String) : SpeechIntent()
+
   object ZoomInIntent : SpeechIntent()
 
   object ZoomOutIntent : SpeechIntent()

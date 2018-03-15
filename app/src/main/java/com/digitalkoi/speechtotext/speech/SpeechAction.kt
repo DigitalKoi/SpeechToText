@@ -10,6 +10,8 @@ sealed class SpeechAction : MviAction {
 
   data class PlayPressedAction(val statusRecord: Int) : SpeechAction()
 
+  data class StopPressedAction(val statusRecord: Int, val text: String) : SpeechAction()
+
   object FontSizeAction : SpeechAction()
 
   object FontSizeInAction : SpeechAction()
