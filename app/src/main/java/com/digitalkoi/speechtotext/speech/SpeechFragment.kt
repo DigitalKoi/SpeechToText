@@ -1,5 +1,7 @@
 package com.digitalkoi.speechtotext.speech
 
+import android.Manifest
+import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -19,6 +21,8 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.drawing.DrawActivity
@@ -35,6 +39,7 @@ import com.digitalkoi.speechtotext.util.SpeechViewModelFactory
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.speech_frag.*
 import kotlin.properties.Delegates
+import com.tbruyelle.rxpermissions2.RxPermissions
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -46,9 +51,11 @@ class SpeechFragment : Fragment(),
   private val disposable = CompositeDisposable()
   private val viewModel: SpeechViewModel by lazy(NONE) {
     ViewModelProviders
-        .of(this, SpeechViewModelFactory.getInstance(context!!))
+        .of(activity, SpeechViewModelFactory.getInstance(activity!!))
         .get(SpeechViewModel::class.java)
   }
+  private val rxPermissions: RxPermissions by lazy { RxPermissions(activity) }
+
   private val playPressedSubject = PublishSubject.create<PlayPressedIntent>()
   private val stopPressedSubject = PublishSubject.create<StopPressedIntent>()
   private val zoomOutSubject = PublishSubject.create<ZoomOutIntent>()
@@ -64,6 +71,7 @@ class SpeechFragment : Fragment(),
 
   private var recSpeechStatus: Int by Delegates.notNull()
   private var keyboardIsOpen: Boolean by Delegates.notNull()
+  private var idPatient: String? = null
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     val root = inflater?.inflate(R.layout.speech_frag, container, false)
@@ -79,7 +87,7 @@ class SpeechFragment : Fragment(),
   override fun onDestroy() {
     super.onDestroy()
     disposable.dispose()
-
+    showDialogs(false, false)
   }
 
   override fun intents(): Observable<SpeechIntent> {
@@ -99,11 +107,12 @@ class SpeechFragment : Fragment(),
   @SuppressLint("LogNotTimber")
   override fun render(state: SpeechViewState) {
     recSpeechStatus = state.recSpeechStatus
+    idPatient = state.idPatient
     if (state.error != null) showToast() //return for fatal error
     speechTextField.textSize = state.fontSize
     if (state.showDialogId || state.showDialogConfirmation) {
-      showDialogId(state.showDialogId, state.showDialogConfirmation)
-    } else { showDialogId(false, false)
+      showDialogs(state.showDialogId, state.showDialogConfirmation)
+    } else { showDialogs(false, false)
     }
     keyboardIsOpen =
         if (state.showKeyboard) { showKeyboard(true); true }
@@ -128,15 +137,14 @@ class SpeechFragment : Fragment(),
   private fun showDialogIdIntent(): Observable<ShowDialogIdIntent> = showDialogIdSubject
   private fun showDialogConfirmIntent(): Observable<ShowDialogConfirmIntent> = showDialogConfirmSubject
   private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
-
-
   private fun initialClickListeners() {
     speechPlayBt.setOnClickListener {
-      if (recSpeechStatus == Constants.REC_STATUS_STOP) { showDialogIdSubject.onNext(ShowDialogIdIntent(true)) }
-      else if (recSpeechStatus == Constants.REC_STATUS_PAUSE) { playPressedSubject.onNext(PlayPressedIntent) }
-    }
+      checkPermissions()
+
+      }
+
     speechPauseBt.setOnClickListener { }
-    speechStopBt.setOnClickListener { stopPressedSubject.onNext(StopPressedIntent(speechTextField.text)) }
+    speechStopBt.setOnClickListener { stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString())) }
     speechPlusBt.setOnClickListener { zoomInSubject.onNext(ZoomInIntent) }
     speechMinusBt.setOnClickListener { zoomOutSubject.onNext(ZoomOutIntent) }
     speechPaintBt.setOnClickListener { showDrawActivity() }
@@ -147,6 +155,7 @@ class SpeechFragment : Fragment(),
     speechKeyboardBt.setOnClickListener { showKeyboardSubject.onNext(ShowKeyboardIntent(!keyboardIsOpen)) }
   }
 
+
   private fun initialDialogId() {
     val view = layoutInflater.inflate(R.layout.dialog_patient_id, null)
     builder.setView(view)
@@ -155,13 +164,17 @@ class SpeechFragment : Fragment(),
 
     val dialogPatientOk = view.findViewById<View>(R.id.dialogPatientOk)
     val dialogPatientCancel = view.findViewById<View>(R.id.dialogPatientCancel)
+    val dialogPatientIdEdit = view.findViewById<EditText>(R.id.dialogPatientIdEd)
+    //TODO: clear text field
+    dialogPatientIdEdit.setText("", TextView.BufferType.EDITABLE)
     dialogPatientOk.setOnClickListener {
+      playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString()))
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
-      dialogId.dismiss()
+//      dialogId.dismiss()
     }
     dialogPatientCancel.setOnClickListener {
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
-      dialogId.dismiss()
+//      dialogId.dismiss()
     }
   }
 
@@ -181,7 +194,7 @@ class SpeechFragment : Fragment(),
 
   }
 
-  private fun showDialogId(showDialogId: Boolean, showDialogConfirm: Boolean) {
+  private fun showDialogs(showDialogId: Boolean, showDialogConfirm: Boolean) {
     when {
       showDialogId -> dialogId.show()
       showDialogConfirm -> dialogConfirm.show()
@@ -203,7 +216,31 @@ class SpeechFragment : Fragment(),
     startActivity(intent)
   }
 
-  private fun showToast() {
+  private fun showToast() =
     Toast.makeText(activity, "Check network settings please", Toast.LENGTH_LONG).show()
+
+
+  private fun checkPermissions() =
+    rxPermissions.request(permission.RECORD_AUDIO,
+                          permission.WRITE_EXTERNAL_STORAGE)
+            .subscribe { granted ->
+                if (!granted) {
+                  Toast.makeText(
+                      activity,
+                      "Allow access to recording audio and writing data to storage",
+                      Toast.LENGTH_LONG
+                  )
+                      .show()
+
+                  activity.finish()
+                } else {
+                    when (recSpeechStatus) {
+                      Constants.REC_STATUS_STOP ->
+                        showDialogIdSubject.onNext(ShowDialogIdIntent(true))
+                      Constants.REC_STATUS_PAUSE ->
+                        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+                    }
+                }
+            }
+
   }
-}

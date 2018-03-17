@@ -25,13 +25,13 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
-  flavorDimensions "default"
+//  flavorDimensions "default"
 
-  productFlavors {
-    mock {
-      applicationIdSuffix = ".mock"
-    }
-  }
+//  productFlavors {
+//    mock {
+//      applicationIdSuffix = ".mock"
+//    }
+//  }
 }
 
 dependencies {
@@ -49,9 +49,8 @@ dependencies {
   kapt 'com.google.dagger:dagger-compiler:2.14.1'
   kapt 'com.google.dagger:dagger-android-processor:2.14.1'
 
-  compile 'com.rm:freedrawview:1.1.2'
-
-
+  implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
+  implementation 'com.rm:freedrawview:1.1.2'
 
   testImplementation 'junit:junit:4.12'
   androidTestImplementation 'com.android.support.test:runner:1.0.1'

@@ -6,7 +6,9 @@ import com.digitalkoi.speechtotext.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.speech.SpeechIntent.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.*
-import com.digitalkoi.speechtotext.util.Constants
+import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_PAUSE
+import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_PLAY
+import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_STOP
 import com.digitalkoi.speechtotext.util.notOfType
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
@@ -53,9 +55,10 @@ class SpeechViewModel(
 
   private fun actionFromIntent(intent: SpeechIntent): SpeechAction {
     return when (intent) {
-      is InitialIntent -> FontSizeAction
-      is PlayPressedIntent -> PlayPressedAction(Constants.REC_STATUS_PLAY) //TODO: change STATUS
-      is StopPressedIntent -> StopPressedAction(Constants.REC_STATUS_STOP, intent.text)
+      is InitialIntent ->  FontSizeAction
+      is PlayPressedIntent -> PlayPressedAction(REC_STATUS_PLAY, intent.patientId)
+      is StopPressedIntent -> StopPressedAction(REC_STATUS_STOP, intent.id, intent.text)
+      is PaucePressedIntent -> PausePressedAction(REC_STATUS_PAUSE)
       is ZoomInIntent -> SpeechAction.FontSizeInAction
       is ZoomOutIntent -> SpeechAction.FontSizeOutAction
       is ShowDialogIdIntent -> SpeechAction.ShowDialogIdAction(intent.showView)
@@ -70,18 +73,20 @@ class SpeechViewModel(
       when (result) {
         is LoadSpeechResult -> when (result) {
           is LoadSpeechResult.InFlight -> previousState.copy(isLoading = true)
-          is LoadSpeechResult.Failure -> previousState.copy(isLoading = false, error = result.error)
-          is LoadSpeechResult.Success -> previousState.copy(isLoading = false, text = result.text)
+          is LoadSpeechResult.Failure -> previousState.copy(
+              isLoading = false, error = result.error, recSpeechStatus = REC_STATUS_STOP)
+          is LoadSpeechResult.Success -> previousState.copy(
+              isLoading = false, idPatient = result.id,
+              text = result.text, recSpeechStatus = REC_STATUS_PLAY)
 
         }
-        is SaveSpeechResult -> when (result) {
-          is SaveSpeechResult.InFlight -> previousState.copy(isLoading = true)
-          is SaveSpeechResult.Failure -> previousState.copy(isLoading = false, error =  result.error)
-          is SaveSpeechResult.Success -> previousState.copy(
-              isLoading = false,
-              recSpeechStatus = Constants.REC_STATUS_STOP,
-              text = null)
-        }
+        is SaveSpeechResult ->
+          previousState.copy(
+              isLoading = false, recSpeechStatus = REC_STATUS_STOP,
+              idPatient = null, text = null)
+
+        is PauseSpeechResult -> previousState.copy(isLoading = false, recSpeechStatus = REC_STATUS_PAUSE)
+
         is FontSizeResult -> when (result) {
           is FontSizeResult.Success -> previousState.copy(
               isLoading = false, fontSize = result.fontSize

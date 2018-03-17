@@ -12,19 +12,14 @@ open class SpeechRepository private constructor(
 //        private val speechRemoteDataSource: SpeechDataSource,
   private val speechLocalDataSource: SpeechDataSource
 ) : SpeechDataSource {
+
   override fun getSpeech(): Single<String> {
-    TODO(
-        "not implemented"
-    ) //To change body of created functions use File | Settings | File Templates.
+
+    return Single.just("hello")
   }
 
-  override fun saveSpeech(
-    id: String,
-    text: String
-  ): Completable {
-    TODO(
-        "not implemented"
-    ) //To change body of created functions use File | Settings | File Templates.
+  override fun saveSpeech(id: String, text: String): Completable {
+    return Completable.complete()
   }
 
   override fun changeSpeechResource(): Completable {

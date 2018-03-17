@@ -10,9 +10,11 @@ sealed class SpeechIntent : MviIntent {
 
   object InitialIntent : SpeechIntent()
 
-  object PlayPressedIntent : SpeechIntent()
+  data class PlayPressedIntent(val patientId: String) : SpeechIntent()
 
-  data class StopPressedIntent(val text: String) : SpeechIntent()
+  data class StopPressedIntent(val id: String, val text: String) : SpeechIntent()
+
+  object PaucePressedIntent : SpeechIntent()
 
   object ZoomInIntent : SpeechIntent()
 

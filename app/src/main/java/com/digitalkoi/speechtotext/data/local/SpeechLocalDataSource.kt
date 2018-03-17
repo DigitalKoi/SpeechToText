@@ -68,6 +68,6 @@ class SpeechLocalDataSource private constructor(
   }
 
   companion object : SingletonHolderDoubleArg<SpeechLocalDataSource, Context, BaseSchedulerProvider>(
-      ::SpeechLocalDataSource
+      { context, schedulerProvider -> SpeechLocalDataSource(context, schedulerProvider) }
   )
 }

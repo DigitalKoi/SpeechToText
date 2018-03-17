@@ -1,5 +1,6 @@
 package com.digitalkoi.speechtotext.util
 
+import android.app.Activity
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import android.content.Context
@@ -12,7 +13,8 @@ import com.digitalkoi.speechtotext.di.Injection
  */
 
 class SpeechViewModelFactory private constructor(
-  private val applicationContext: Context
+  private val applicationContext: Activity
+
 ) : ViewModelProvider.Factory {
 
   override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -21,6 +23,7 @@ class SpeechViewModelFactory private constructor(
       return SpeechViewModel(
           SpeechActionProcessorHolder(
               Injection.provideTasksRepository(applicationContext),
+              applicationContext,
               Injection.provideSchedulerProvider()
           )
       ) as T
@@ -28,7 +31,7 @@ class SpeechViewModelFactory private constructor(
     throw IllegalAccessException("unknown model class $modelClass")
   }
 
-  companion object : SingletonHolderSingleArg<SpeechViewModelFactory, Context>(
+  companion object : SingletonHolderSingleArg<SpeechViewModelFactory, Activity>(
       ::SpeechViewModelFactory
   )
 }

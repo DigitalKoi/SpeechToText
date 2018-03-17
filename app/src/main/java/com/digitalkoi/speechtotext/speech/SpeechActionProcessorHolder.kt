@@ -1,5 +1,9 @@
 package com.digitalkoi.speechtotext.speech
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.widget.Toast
 import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.*
@@ -9,22 +13,26 @@ import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowKeyboa
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-
+import com.tbruyelle.rxpermissions2.RxPermissions
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
  */
 
 class SpeechActionProcessorHolder(
   private val speechRepository: SpeechRepository,
+  private val activity: Activity,
   private val schedulerProvider: BaseSchedulerProvider
 ) {
 
+  private val rxPermissions: RxPermissions by lazy { RxPermissions(activity) }
+
   private val playPressedProcessor =
-    ObservableTransformer<PlayPressedAction, LoadSpeechResult> { action ->
-      action.flatMap {
+    ObservableTransformer<PlayPressedAction, LoadSpeechResult> { actions ->
+      actions.flatMap { action ->
+
         speechRepository.getSpeech()
             .toObservable()
-            .map { text -> LoadSpeechResult.Success(text) }
+            .map { text -> LoadSpeechResult.Success(action.id, text) }
             .cast(LoadSpeechResult::class.java)
             .onErrorReturn(LoadSpeechResult::Failure)
             .subscribeOn(schedulerProvider.io())
@@ -34,23 +42,18 @@ class SpeechActionProcessorHolder(
     }
 
   private val stopPressedProcessor =
-    ObservableTransformer<StopPressedAction, SaveSpeechResult> { action ->
-      action.flatMap {
-        speechRepository.saveSpeech()
-            .
-            .toObservable()
-            .map { SaveSpeechResult.Success }
-            .cast(SaveSpeechResult::class.java)
-            .onErrorReturn(SaveSpeechResult::Failure)
-            .subscribeOn(schedulerProvider.io())
-            .observeOn(schedulerProvider.ui())
-            .startWith(SaveSpeechResult.InFlight)
+    ObservableTransformer<StopPressedAction, SaveSpeechResult> { actions ->
+        actions
+            .flatMap { action ->
+              speechRepository.saveSpeech(action.id, action.text
+              ).andThen(Observable.just(SaveSpeechResult))
+            }
       }
-    }
+
 
   private val fontSizeProcessor =
-    ObservableTransformer<FontSizeAction, FontSizeResult> { action ->
-      action.flatMap {
+    ObservableTransformer<FontSizeAction, FontSizeResult> { actions ->
+      actions.flatMap {
         speechRepository.getTextSize()
             .toObservable()
             .map { fontSize -> FontSizeResult.Success(fontSize) }
@@ -61,8 +64,8 @@ class SpeechActionProcessorHolder(
     }
 
   private val fontSizeInProcessor =
-    ObservableTransformer<FontSizeInAction, FontSizeResult> { action ->
-      action.flatMap {
+    ObservableTransformer<FontSizeInAction, FontSizeResult> { actions ->
+      actions.flatMap {
         speechRepository.zoomIn()
             .toObservable()
             .map { zoomIn -> FontSizeResult.Success(zoomIn) }
@@ -73,8 +76,8 @@ class SpeechActionProcessorHolder(
     }
 
   private val fontSizeOutProcessor =
-    ObservableTransformer<FontSizeOutAction, FontSizeResult> { action ->
-      action.flatMap {
+    ObservableTransformer<FontSizeOutAction, FontSizeResult> { actions ->
+      actions.flatMap {
         speechRepository.zoomOut()
             .toObservable()
             .map { zoomOut -> FontSizeResult.Success(zoomOut) }
@@ -85,22 +88,22 @@ class SpeechActionProcessorHolder(
     }
 
   private val showDialogIdProcessor =
-    ObservableTransformer<ShowDialogIdAction, ShowDialogIdResult> { action ->
-      action.map { state -> ShowViewResult.ShowDialogIdResult(state.showView) }
+    ObservableTransformer<ShowDialogIdAction, ShowDialogIdResult> { actions ->
+      actions.map { state -> ShowViewResult.ShowDialogIdResult(state.showView) }
           .subscribeOn(schedulerProvider.io())
           .observeOn(schedulerProvider.ui())
     }
 
   private val showDialogConfirmProcessor =
-    ObservableTransformer<ShowDialogConfirmAction, ShowDialogConfirmResult> { action ->
-      action.map { state -> ShowViewResult.ShowDialogConfirmResult(state.showView) }
+    ObservableTransformer<ShowDialogConfirmAction, ShowDialogConfirmResult> { actions ->
+      actions.map { state -> ShowViewResult.ShowDialogConfirmResult(state.showView) }
           .subscribeOn(schedulerProvider.io())
           .observeOn(schedulerProvider.ui())
     }
 
   private val showKeyboardProcessor =
-    ObservableTransformer<ShowKeyboardAction, ShowKeyboardResult> { action ->
-      action.map { state ->
+    ObservableTransformer<ShowKeyboardAction, ShowKeyboardResult> { actions ->
+      actions.map { state ->
         ShowViewResult.ShowKeyboardResult(state.showView) }
           .subscribeOn(schedulerProvider.io())
           .observeOn(schedulerProvider.ui())
@@ -123,4 +126,6 @@ class SpeechActionProcessorHolder(
         )
       }
     }
+
+
 }

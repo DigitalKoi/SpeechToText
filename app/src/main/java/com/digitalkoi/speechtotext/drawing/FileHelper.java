@@ -14,7 +14,6 @@ import java.io.ObjectOutputStream;
  */
 
 class FileHelper {
-
   private static final String FILE_NAME = "draw_state.ser";
 
   static void saveStateIntoFile(

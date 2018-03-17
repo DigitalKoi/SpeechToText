@@ -9,16 +9,14 @@ import com.digitalkoi.speechtotext.mvibase.MviResult
 sealed class SpeechResult : MviResult {
 
   sealed class LoadSpeechResult : SpeechResult() {
-    data class Success(val text: String) : LoadSpeechResult()
+    data class Success(val id: String, val text: String) : LoadSpeechResult()
     data class Failure(val error: Throwable) : LoadSpeechResult()
     object InFlight : LoadSpeechResult()
   }
 
-  sealed class SaveSpeechResult : SpeechResult() {
-    object Success : SaveSpeechResult()
-    data class Failure(val error: Throwable) : SaveSpeechResult()
-    object InFlight : SaveSpeechResult()
-  }
+  object SaveSpeechResult : SpeechResult()
+
+  object PauseSpeechResult : SpeechResult()
 
   sealed class FontSizeResult : SpeechResult() {
     data class Success(val fontSize: Float) : FontSizeResult()
