@@ -1,6 +1,5 @@
 package com.digitalkoi.speechtotext.speech
 
-import android.Manifest
 import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -16,6 +15,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.support.v7.app.AlertDialog
+import android.text.Editable
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -23,8 +23,10 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.TextView.BufferType.EDITABLE
 import android.widget.Toast
 import com.digitalkoi.speechtotext.R
+import com.digitalkoi.speechtotext.R.string
 import com.digitalkoi.speechtotext.drawing.DrawActivity
 import com.digitalkoi.speechtotext.speech.SpeechIntent.InitialIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.PlayPressedIntent
@@ -51,7 +53,7 @@ class SpeechFragment : Fragment(),
   private val disposable = CompositeDisposable()
   private val viewModel: SpeechViewModel by lazy(NONE) {
     ViewModelProviders
-        .of(activity, SpeechViewModelFactory.getInstance(activity!!))
+        .of(this, SpeechViewModelFactory.getInstance(activity!!))
         .get(SpeechViewModel::class.java)
   }
   private val rxPermissions: RxPermissions by lazy { RxPermissions(activity) }
@@ -108,6 +110,10 @@ class SpeechFragment : Fragment(),
   override fun render(state: SpeechViewState) {
     recSpeechStatus = state.recSpeechStatus
     idPatient = state.idPatient
+    if (state.text != null) {
+      val
+      speechTextField.setText(state.text, EDITABLE)
+    }
     if (state.error != null) showToast() //return for fatal error
     speechTextField.textSize = state.fontSize
     if (state.showDialogId || state.showDialogConfirmation) {
@@ -137,14 +143,13 @@ class SpeechFragment : Fragment(),
   private fun showDialogIdIntent(): Observable<ShowDialogIdIntent> = showDialogIdSubject
   private fun showDialogConfirmIntent(): Observable<ShowDialogConfirmIntent> = showDialogConfirmSubject
   private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
+
   private fun initialClickListeners() {
-    speechPlayBt.setOnClickListener {
-      checkPermissions()
-
-      }
-
+    speechPlayBt.setOnClickListener { checkPermissions() }
     speechPauseBt.setOnClickListener { }
-    speechStopBt.setOnClickListener { stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString())) }
+    speechStopBt.setOnClickListener {
+      if  (idPatient != null)
+        stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString())) }
     speechPlusBt.setOnClickListener { zoomInSubject.onNext(ZoomInIntent) }
     speechMinusBt.setOnClickListener { zoomOutSubject.onNext(ZoomOutIntent) }
     speechPaintBt.setOnClickListener { showDrawActivity() }
@@ -194,7 +199,7 @@ class SpeechFragment : Fragment(),
 
   }
 
-  private fun showDialogs(showDialogId: Boolean, showDialogConfirm: Boolean) {
+  private fun showDialogs(showDialogId: Boolean, showDialogConfirm: Boolean) =
     when {
       showDialogId -> dialogId.show()
       showDialogConfirm -> dialogConfirm.show()
@@ -203,13 +208,11 @@ class SpeechFragment : Fragment(),
         dialogConfirm.dismiss()
       }
     }
-  }
 
-  private fun showKeyboard(show: Boolean) {
-    //TODO: show/hide keyboard only with button
+  private fun showKeyboard(show: Boolean) =
+    //TODO: show/hide keyboard only with the button
     if (show) { keyboardManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.SHOW_IMPLICIT) }
     else { keyboardManager.hideSoftInputFromWindow(speechTextField.windowToken, 0) }
-  }
 
   private fun showDrawActivity() {
     val intent = Intent(context, DrawActivity::class.java)
@@ -219,26 +222,16 @@ class SpeechFragment : Fragment(),
   private fun showToast() =
     Toast.makeText(activity, "Check network settings please", Toast.LENGTH_LONG).show()
 
-
   private fun checkPermissions() =
     rxPermissions.request(permission.RECORD_AUDIO,
                           permission.WRITE_EXTERNAL_STORAGE)
             .subscribe { granted ->
                 if (!granted) {
-                  Toast.makeText(
-                      activity,
-                      "Allow access to recording audio and writing data to storage",
-                      Toast.LENGTH_LONG
-                  )
-                      .show()
-
-                  activity.finish()
+                  Toast.makeText(activity, getString(string.permissions), Toast.LENGTH_LONG).show()
                 } else {
                     when (recSpeechStatus) {
-                      Constants.REC_STATUS_STOP ->
-                        showDialogIdSubject.onNext(ShowDialogIdIntent(true))
-                      Constants.REC_STATUS_PAUSE ->
-                        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+                      Constants.REC_STATUS_STOP -> showDialogIdSubject.onNext(ShowDialogIdIntent(true))
+                      Constants.REC_STATUS_PAUSE -> playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
                     }
                 }
             }

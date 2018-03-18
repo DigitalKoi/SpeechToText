@@ -103,6 +103,7 @@
       android:layout_marginStart="16dp"
       android:layout_marginTop="8dp"
       android:ems="10"
+      android:text=""
       android:inputType="textPersonName"
       android:maxLines="1"
       android:textSize="18sp"

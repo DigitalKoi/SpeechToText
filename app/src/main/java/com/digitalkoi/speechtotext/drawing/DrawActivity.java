@@ -1,7 +1,6 @@
 package com.digitalkoi.speechtotext.drawing;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.TransitionManager;
@@ -20,7 +19,6 @@ import com.rm.freedrawview.FreeDrawSerializableState;
 import com.rm.freedrawview.FreeDrawView;
 import com.rm.freedrawview.PathDrawnListener;
 import com.rm.freedrawview.PathRedoUndoCountChangeListener;
-import com.rm.freedrawview.ResizeBehaviour;
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 14/03/18.

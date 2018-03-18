@@ -20,4 +20,5 @@
   <string name="stroke_alpha">Stroke alpha</string>
   <string name="stroke_width">Stroke width</string>
   <string name="random_color">Random color</string>
+  <string name="permissions">Allow access to recording audio and writing data to storage</string>
 </resources>

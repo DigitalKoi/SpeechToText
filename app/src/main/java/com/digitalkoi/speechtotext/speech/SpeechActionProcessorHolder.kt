@@ -1,9 +1,5 @@
 package com.digitalkoi.speechtotext.speech
 
-import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.widget.Toast
 import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.*
@@ -11,26 +7,21 @@ import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialog
 import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialogIdResult
 import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowKeyboardResult
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
-import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
-import com.tbruyelle.rxpermissions2.RxPermissions
+import io.reactivex.Observable
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
  */
 
 class SpeechActionProcessorHolder(
   private val speechRepository: SpeechRepository,
-  private val activity: Activity,
   private val schedulerProvider: BaseSchedulerProvider
 ) {
-
-  private val rxPermissions: RxPermissions by lazy { RxPermissions(activity) }
 
   private val playPressedProcessor =
     ObservableTransformer<PlayPressedAction, LoadSpeechResult> { actions ->
       actions.flatMap { action ->
-
-        speechRepository.getSpeech()
+        speechRepository.getSpeechToText()
             .toObservable()
             .map { text -> LoadSpeechResult.Success(action.id, text) }
             .cast(LoadSpeechResult::class.java)
@@ -126,6 +117,4 @@ class SpeechActionProcessorHolder(
         )
       }
     }
-
-
 }

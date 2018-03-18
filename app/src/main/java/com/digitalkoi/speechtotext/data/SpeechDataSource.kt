@@ -9,7 +9,7 @@ import io.reactivex.Single
 
 interface SpeechDataSource {
 
-  fun getSpeech(): Single<String>
+  fun getSpeechToText(): Single<String>
 
   fun saveSpeech(id: String, text: String): Completable
 
