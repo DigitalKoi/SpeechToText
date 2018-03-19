@@ -14,6 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.speech.RecognitionService
 import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.util.Log
@@ -111,8 +112,8 @@ class SpeechFragment : Fragment(),
     recSpeechStatus = state.recSpeechStatus
     idPatient = state.idPatient
     if (state.text != null) {
-      val
       speechTextField.setText(state.text, EDITABLE)
+
     }
     if (state.error != null) showToast() //return for fatal error
     speechTextField.textSize = state.fontSize

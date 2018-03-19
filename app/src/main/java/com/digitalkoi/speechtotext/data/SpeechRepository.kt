@@ -1,7 +1,9 @@
 package com.digitalkoi.speechtotext.data
 
-import com.digitalkoi.speechtotext.util.SingletonHolderSingleArg
+import com.digitalkoi.speechtotext.data.remote.SpeechInput
+import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 
 /**
@@ -9,16 +11,21 @@ import io.reactivex.Single
  */
 
 open class SpeechRepository private constructor(
-//        private val speechRemoteDataSource: SpeechDataSource,
+  private val speechRemoteDataSource: SpeechInput,
   private val speechLocalDataSource: SpeechDataSource
-) : SpeechDataSource {
+) : SpeechDataSource, SpeechInput {
 
-  override fun getSpeechToText(): Single<String> {
 
-    return Single.just("hello")
+  override fun startListener(): Observable<((String) -> Unit)?>? {
+    return  speechRemoteDataSource.startListener()
+  }
+
+  override fun stopListener() {
+    speechRemoteDataSource.stopListener()
   }
 
   override fun saveSpeech(id: String, text: String): Completable {
+    stopListener()
     return Completable.complete()
   }
 
@@ -40,7 +47,7 @@ open class SpeechRepository private constructor(
     return speechLocalDataSource.zoomOut()
   }
 
-  companion object : SingletonHolderSingleArg<SpeechRepository, SpeechDataSource>(
+  companion object : SingletonHolderDoubleArg<SpeechRepository, SpeechInput, SpeechDataSource>(
       ::SpeechRepository
   )
 }
