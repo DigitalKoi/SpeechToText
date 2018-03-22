@@ -58,7 +58,7 @@ class SpeechViewModel(
       is InitialIntent ->  FontSizeAction
       is PlayPressedIntent -> PlayPressedAction(REC_STATUS_PLAY, intent.patientId)
       is StopPressedIntent -> StopPressedAction(REC_STATUS_STOP, intent.id, intent.text)
-      is PaucePressedIntent -> PausePressedAction(REC_STATUS_PAUSE)
+      is PausePressedIntent -> PausePressedAction(REC_STATUS_PAUSE)
       is ZoomInIntent -> SpeechAction.FontSizeInAction
       is ZoomOutIntent -> SpeechAction.FontSizeOutAction
       is ShowDialogIdIntent -> SpeechAction.ShowDialogIdAction(intent.showView)

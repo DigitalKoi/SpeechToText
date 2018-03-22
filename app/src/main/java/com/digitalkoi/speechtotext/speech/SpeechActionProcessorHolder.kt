@@ -22,12 +22,14 @@ class SpeechActionProcessorHolder(
     ObservableTransformer<PlayPressedAction, LoadSpeechResult> { actions ->
       actions.flatMap { action ->
         speechRepository.startListener()
-            ?.map { text -> LoadSpeechResult.Success(action.id, text.toString()) }
-            ?.cast(LoadSpeechResult::class.java)
-            ?.onErrorReturn(LoadSpeechResult::Failure)
-            ?.subscribeOn(schedulerProvider.io())
-            ?.observeOn(schedulerProvider.ui())
-            ?.startWith(LoadSpeechResult.InFlight)
+            .toObservable()
+            .map { text ->
+              LoadSpeechResult.Success(action.id, text) }
+            .cast(LoadSpeechResult::class.java)
+            .onErrorReturn(LoadSpeechResult::Failure)
+            .subscribeOn(schedulerProvider.io())
+            .observeOn(schedulerProvider.ui())
+            .startWith(LoadSpeechResult.InFlight)
       }
     }
 

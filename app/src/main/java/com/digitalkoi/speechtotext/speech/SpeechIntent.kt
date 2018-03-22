@@ -14,7 +14,7 @@ sealed class SpeechIntent : MviIntent {
 
   data class StopPressedIntent(val id: String, val text: String) : SpeechIntent()
 
-  object PaucePressedIntent : SpeechIntent()
+  object PausePressedIntent : SpeechIntent()
 
   object ZoomInIntent : SpeechIntent()
 

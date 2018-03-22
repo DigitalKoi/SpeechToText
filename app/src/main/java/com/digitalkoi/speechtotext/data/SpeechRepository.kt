@@ -3,8 +3,10 @@ package com.digitalkoi.speechtotext.data
 import com.digitalkoi.speechtotext.data.remote.SpeechInput
 import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -16,8 +18,8 @@ open class SpeechRepository private constructor(
 ) : SpeechDataSource, SpeechInput {
 
 
-  override fun startListener(): Observable<((String) -> Unit)?>? {
-    return  speechRemoteDataSource.startListener()
+  override fun startListener(): Flowable<String> {
+    return speechRemoteDataSource.startListener()
   }
 
   override fun stopListener() {

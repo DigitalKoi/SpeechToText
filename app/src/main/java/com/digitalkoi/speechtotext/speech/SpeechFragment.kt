@@ -115,7 +115,8 @@ class SpeechFragment : Fragment(),
       speechTextField.setText(state.text, EDITABLE)
 
     }
-    if (state.error != null) showToast() //return for fatal error
+    if (state.error != null)
+      showToast() //return for fatal error
     speechTextField.textSize = state.fontSize
     if (state.showDialogId || state.showDialogConfirmation) {
       showDialogs(state.showDialogId, state.showDialogConfirmation)

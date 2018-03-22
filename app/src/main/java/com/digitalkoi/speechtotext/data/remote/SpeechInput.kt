@@ -1,5 +1,6 @@
 package com.digitalkoi.speechtotext.data.remote
 
+import io.reactivex.Flowable
 import io.reactivex.Observable
 
 /**
@@ -8,7 +9,7 @@ import io.reactivex.Observable
 
 interface SpeechInput {
 
-  fun startListener(): Observable<((String) -> Unit)?>?
+  fun startListener(): Flowable<String>
 
   fun stopListener()
 }
