@@ -1,9 +1,10 @@
 <resources>
-  <string name="app_name">SpeechToText</string>
+  <string name="app_name">CHISI</string>
   <string name="confirm_answer">Confirm your answer please</string>
   <string name="ok">OK</string>
   <string name="cancel">Cancel</string>
   <string name="enter_patient_id">Enter Patient ID</string>
+  <string name="history">History</string>
 
   <!--For drawing Activity-->
   <string name="show_screenshot">Take Screenshot</string>

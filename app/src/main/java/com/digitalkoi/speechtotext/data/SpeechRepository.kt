@@ -1,12 +1,11 @@
 package com.digitalkoi.speechtotext.data
 
+import com.digitalkoi.speechtotext.data.file.FileCSVHelper
 import com.digitalkoi.speechtotext.data.remote.SpeechInput
 import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
-import java.util.concurrent.TimeUnit.MILLISECONDS
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -26,8 +25,10 @@ open class SpeechRepository private constructor(
     speechRemoteDataSource.stopListener()
   }
 
-  override fun saveSpeech(id: String, text: String): Completable {
+  override fun saveSpeech(patientId: String, conversation: String): Completable {
     stopListener()
+    FileCSVHelper.writeFile(patientId, conversation)
+
     return Completable.complete()
   }
 

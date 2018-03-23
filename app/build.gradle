@@ -49,6 +49,8 @@ dependencies {
   kapt 'com.google.dagger:dagger-compiler:2.14.1'
   kapt 'com.google.dagger:dagger-android-processor:2.14.1'
 
+  implementation 'com.opencsv:opencsv:4.1'
+
   implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
   implementation 'com.rm:freedrawview:1.1.2'
 
