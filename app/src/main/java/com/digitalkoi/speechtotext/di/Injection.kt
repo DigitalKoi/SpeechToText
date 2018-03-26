@@ -15,7 +15,7 @@ import com.digitalkoi.speechtotext.util.schedulers.SchedulerProvider
 
 object Injection {
 
-  fun provideTasksRepository(context: Context): SpeechRepository =
+  fun provideRepository(context: Context): SpeechRepository =
     SpeechRepository.getInstance(
         SpeechRemoteDataSource.getInstance(context, provideSchedulerProvider()),
         SpeechLocalDataSource.getInstance(context, provideSchedulerProvider()))

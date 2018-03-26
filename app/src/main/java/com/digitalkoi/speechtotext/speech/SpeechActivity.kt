@@ -7,14 +7,16 @@ import android.view.Menu
 import android.view.MenuItem
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.history.HistoryActivity
-import com.digitalkoi.speechtotext.history.HistoryFragment
 import com.digitalkoi.speechtotext.util.addFragmentToActivity
+import kotlinx.android.synthetic.main.speech_act.speechToolbar
 
 class SpeechActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.speech_act)
+
+    setSupportActionBar(speechToolbar)
 
     if (supportFragmentManager.findFragmentById(R.id.speechContainer) == null) {
       addFragmentToActivity(supportFragmentManager, SpeechFragment(), R.id.speechContainer)

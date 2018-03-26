@@ -8,8 +8,10 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 22/03/18.
@@ -39,23 +41,23 @@ class FileCSVHelper {
     }
 
     fun readFile(): List<CSVConversation> {
-      var list: List<CSVConversation> = listOf()
+      var list: List<CSVConversation>
       try {
 //      val fileStream = FileInputStream(file)
 //      val streamReader = InputStreamReader(fileStream, StandardCharsets.UTF_8)
         val csvReader = CSVReader(FileReader(filePath))
-        convert(csvReader.readAll())
+        list = convert(csvReader!!.readAll())
+        if (list != null) return list
       } catch (e: IOException) {
         Timber.e(e)
       }
-      return list
+      return listOf()
     }
 
     private fun gettingIdFromFile(): String {
       try {
         val csvReader = CSVReader(FileReader(filePath))
-        val toString = csvReader.readAll().size + 1
-        return toString.toString()
+        return (csvReader.readAll().size + 1).toString()
       } catch (e: IOException) {
         Timber.e(e)
       }
@@ -69,9 +71,13 @@ class FileCSVHelper {
     }
 
     private fun convert(csvData: MutableList<Array<String>>): List<CSVConversation> {
-      TODO(
-          "not implemented"
-      ) //To change body of created functions use File | Settings | File Templates.
+      var list = ArrayList<CSVConversation>()
+      csvData.forEachIndexed { index, strings ->
+        run {
+          list.add(index, CSVConversation(strings[0], strings[1], strings[2], strings[3]))
+        }
+      }
+      return list.toList()
     }
 
     private fun existFile() {

@@ -1,11 +1,13 @@
 package com.digitalkoi.speechtotext.history
 
+import com.digitalkoi.speechtotext.data.file.CSVConversation
 import com.digitalkoi.speechtotext.data.repository.SpeechRepository
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import com.digitalkoi.speechtotext.history.HistoryAction.*
 import com.digitalkoi.speechtotext.history.HistoryResult.*
+import io.reactivex.functions.BiFunction
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 24/03/18.
@@ -19,9 +21,15 @@ class HistoryActionProcessorHolder(
   private val initialProcessor =
     ObservableTransformer<InitialAction, InitialResult> { actions ->
       actions.flatMap {
-        speechRepository.getTextSize()
-            .toObservable()
-            .map { fontSize -> InitialResult.Success(fontSize, listOf()) }
+        Observable.zip(
+            speechRepository.getTextSize().toObservable(),
+            speechRepository.getListFromFile("").toObservable(),
+            BiFunction { font: Float, list: List<CSVConversation> -> InitialResult.Success(font, list) }
+        )
+            .cast(InitialResult::class.java)
+            .onErrorReturn(InitialResult::Failure)
+            .subscribeOn(schedulerProvider.io())
+            .observeOn(schedulerProvider.ui())
       }
     }
 

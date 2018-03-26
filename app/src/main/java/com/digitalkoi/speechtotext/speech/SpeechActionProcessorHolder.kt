@@ -9,6 +9,8 @@ import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowKeyboa
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.ObservableTransformer
 import io.reactivex.Observable
+import io.reactivex.ObservableSource
+
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
  */
@@ -35,13 +37,20 @@ class SpeechActionProcessorHolder(
 
   private val stopPressedProcessor =
     ObservableTransformer<StopPressedAction, SaveSpeechResult> { actions ->
-        actions
-            .flatMap { action ->
+        actions.flatMap { action ->
               speechRepository.saveSpeech(action.id, action.text
               ).andThen(Observable.just(SaveSpeechResult))
             }
       }
 
+
+  private val pausePressedProcessor =
+    ObservableTransformer<PausePressedAction, PauseSpeechResult> { actions ->
+      actions.flatMap {
+            speechRepository.stopListener()
+                .andThen(Observable.just(PauseSpeechResult))
+          }
+    }
 
   private val fontSizeProcessor =
     ObservableTransformer<FontSizeAction, FontSizeResult> { actions ->
@@ -101,13 +110,14 @@ class SpeechActionProcessorHolder(
           .observeOn(schedulerProvider.ui())
     }
 
-  internal var actionProcessor =
-    ObservableTransformer<SpeechAction, SpeechResult> { action ->
+    internal var actionProcessor =
+  ObservableTransformer<SpeechAction, SpeechResult> { action ->
       action.publish { shared ->
         Observable.merge(
             listOf(
                 shared.ofType(PlayPressedAction::class.java).compose(playPressedProcessor),
                 shared.ofType(StopPressedAction::class.java).compose(stopPressedProcessor),
+                shared.ofType(PausePressedAction::class.java).compose(pausePressedProcessor),
                 shared.ofType(FontSizeAction::class.java).compose(fontSizeProcessor),
                 shared.ofType(FontSizeInAction::class.java).compose(fontSizeInProcessor),
                 shared.ofType(FontSizeOutAction::class.java).compose(fontSizeOutProcessor),

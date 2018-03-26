@@ -7,11 +7,13 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.EventLog.Event
+import android.util.Log
 import com.digitalkoi.speechtotext.data.local.SpeechLocalDataSource
 import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.BackpressureStrategy
 import io.reactivex.BackpressureStrategy.BUFFER
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Flowable.create
 import io.reactivex.FlowableEmitter
@@ -43,21 +45,39 @@ class SpeechRemoteDataSource(
     return create({ emitter: FlowableEmitter<String> ->
 
             listener = object : RecognitionListener {
-              override fun onReadyForSpeech(params: Bundle?) {}
+              override fun onReadyForSpeech(params: Bundle?) {
+                Log.i("RemoteDate", "onReadyForSpeech")
+              }
 
-              override fun onRmsChanged(rmsdB: Float) {}
+              override fun onRmsChanged(rmsdB: Float) {
+                Log.i("RemoteDate", "onRmsChanged")
+              }
 
-              override fun onBufferReceived(buffer: ByteArray?) {}
+              override fun onBufferReceived(buffer: ByteArray?) {
+                Log.i("RemoteDate", "onBufferReceived")
+              }
 
-              override fun onPartialResults(partialResults: Bundle?) {}
+              override fun onPartialResults(partialResults: Bundle?) {
+                Log.i("RemoteDate", "onPartialResults")
+              }
 
-              override fun onEvent(eventType: Int, params: Bundle?) {}
+              override fun onEvent(eventType: Int, params: Bundle?) {
+                Log.i("RemoteDate", "onEvent")
 
-              override fun onBeginningOfSpeech() {}
+              }
 
-              override fun onEndOfSpeech() {}
+              override fun onBeginningOfSpeech() {
+                Log.i("RemoteDate", "onBeginningOfSpeech")
+              }
 
-              override fun onError(error: Int) {}
+              override fun onEndOfSpeech() {
+                Log.i("RemoteDate", "onEndOfSpeech")
+              }
+
+              override fun onError(error: Int) {
+                Log.e("RemoteDate", "onError: " + error)
+//                startListener()
+              }
 
               override fun onResults(results: Bundle?) {
                 val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)[0] ?: ""
@@ -66,19 +86,16 @@ class SpeechRemoteDataSource(
               }
             }
             speech.setRecognitionListener(listener)
-//            emitter.setCancellable { speech.cancel() }
+            emitter.setCancellable { speech.cancel() }
 
     }, BUFFER)
         .subscribeOn(AndroidSchedulers.mainThread())
   }
 
-  override fun stopListener() {
+  override fun stopListener(): Completable {
     speech.stopListening()
+    return Completable.complete()
   }
-
-//    listener?.invoke(
-//        results?.getStringArray(SpeechRecognizer.RESULTS_RECOGNITION)?.joinToString(" ") ?: ""
-//    )
 
   companion object : SingletonHolderDoubleArg<SpeechRemoteDataSource, Context, BaseSchedulerProvider>(
       ::SpeechRemoteDataSource

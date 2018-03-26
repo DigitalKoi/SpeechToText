@@ -8,20 +8,21 @@
     >
 
   <View
-      android:id="@+id/view"
+      android:id="@+id/historyDatePicker"
       android:layout_width="match_parent"
       android:layout_height="32dp"
-      android:background="@android:color/black"
+      android:background="@color/colorDatePicker"
       tools:layout_editor_absoluteX="0dp"
       tools:layout_editor_absoluteY="0dp"
       />
   <android.support.v7.widget.RecyclerView
       android:id="@+id/historyRecycler"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="0dp"
+      android:layout_marginBottom="8dp"
       android:scrollbars="vertical"
-      app:layout_constraintTop_toBottomOf="@+id/view"
-      tools:layout_editor_absoluteX="16dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/historyDatePicker"
       />
   <ImageView
       android:id="@+id/imageView"
@@ -30,9 +31,9 @@
       android:layout_marginBottom="8dp"
       android:layout_marginEnd="8dp"
       android:layout_marginTop="8dp"
-      app:layout_constraintBottom_toBottomOf="@+id/view"
+      app:layout_constraintBottom_toBottomOf="@+id/historyDatePicker"
       app:layout_constraintEnd_toStartOf="@+id/textView"
-      app:layout_constraintTop_toTopOf="@+id/view"
+      app:layout_constraintTop_toTopOf="@+id/historyDatePicker"
       app:srcCompat="@drawable/ic_date"
       />
   <TextView
@@ -45,10 +46,10 @@
       android:layout_marginTop="8dp"
       android:text="Select Date"
       android:textColor="@android:color/white"
-      app:layout_constraintBottom_toBottomOf="@+id/view"
+      app:layout_constraintBottom_toBottomOf="@+id/historyDatePicker"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="@+id/view"
+      app:layout_constraintTop_toTopOf="@+id/historyDatePicker"
       />
 
 </android.support.constraint.ConstraintLayout>

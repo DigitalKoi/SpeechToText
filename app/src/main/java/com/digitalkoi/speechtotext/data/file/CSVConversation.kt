@@ -9,9 +9,9 @@ import java.util.Date
 
 data class CSVConversation(
   @CsvBindByName
-  val serialNumber: Long,
+  val serialNumber: String,
   @CsvBindByName
-  val time: Date,
+  val time: String,
   @CsvBindByName
   val patientId: String,
   @CsvBindByName

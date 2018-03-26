@@ -14,7 +14,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.speech.RecognitionService
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.util.Log
@@ -30,6 +30,7 @@ import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.R.string
 import com.digitalkoi.speechtotext.drawing.DrawActivity
 import com.digitalkoi.speechtotext.speech.SpeechIntent.InitialIntent
+import com.digitalkoi.speechtotext.speech.SpeechIntent.PausePressedIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.PlayPressedIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogConfirmIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ShowDialogIdIntent
@@ -38,11 +39,12 @@ import com.digitalkoi.speechtotext.speech.SpeechIntent.StopPressedIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ZoomInIntent
 import com.digitalkoi.speechtotext.speech.SpeechIntent.ZoomOutIntent
 import com.digitalkoi.speechtotext.util.Constants
-import com.digitalkoi.speechtotext.util.SpeechViewModelFactory
+import com.digitalkoi.speechtotext.util.ViewModelFactory
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.speech_frag.*
 import kotlin.properties.Delegates
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_PAUSE
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -54,13 +56,14 @@ class SpeechFragment : Fragment(),
   private val disposable = CompositeDisposable()
   private val viewModel: SpeechViewModel by lazy(NONE) {
     ViewModelProviders
-        .of(this, SpeechViewModelFactory.getInstance(activity!!))
+        .of(this, ViewModelFactory.getInstance(activity!!))
         .get(SpeechViewModel::class.java)
   }
   private val rxPermissions: RxPermissions by lazy { RxPermissions(activity) }
 
   private val playPressedSubject = PublishSubject.create<PlayPressedIntent>()
   private val stopPressedSubject = PublishSubject.create<StopPressedIntent>()
+  private val pausePressedSubject = PublishSubject.create<PausePressedIntent>()
   private val zoomOutSubject = PublishSubject.create<ZoomOutIntent>()
   private val zoomInSubject = PublishSubject.create<ZoomInIntent>()
   private val showDialogIdSubject = PublishSubject.create<ShowDialogIdIntent>()
@@ -94,10 +97,12 @@ class SpeechFragment : Fragment(),
   }
 
   override fun intents(): Observable<SpeechIntent> {
-    return Observable.merge(listOf(
+    return Observable.merge(
+        listOf(
             initialIntent(),
             playPressedIntent(),
             stopPressedIntent(),
+            pausePressedIntent(),
             zoomInIntent(),
             zoomOutIntent(),
             showDialogIdIntent(),
@@ -112,8 +117,8 @@ class SpeechFragment : Fragment(),
     recSpeechStatus = state.recSpeechStatus
     idPatient = state.idPatient
     if (state.text != null) {
-      speechTextField.setText(state.text, EDITABLE)
-
+      val text = speechTextField.text.toString() + " "
+      speechTextField.setText(text + state.text, EDITABLE)
     }
     if (state.error != null)
       showToast() //return for fatal error
@@ -140,6 +145,7 @@ class SpeechFragment : Fragment(),
   private fun initialIntent(): Observable<InitialIntent> = Observable.just(InitialIntent)
   private fun playPressedIntent(): Observable<PlayPressedIntent> = playPressedSubject
   private fun stopPressedIntent(): Observable<StopPressedIntent> = stopPressedSubject
+  private fun pausePressedIntent(): Observable<PausePressedIntent> = pausePressedSubject
   private fun zoomInIntent(): Observable<ZoomInIntent> = zoomInSubject
   private fun zoomOutIntent(): Observable<ZoomOutIntent> = zoomOutSubject
   private fun showDialogIdIntent(): Observable<ShowDialogIdIntent> = showDialogIdSubject
@@ -147,18 +153,32 @@ class SpeechFragment : Fragment(),
   private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
 
   private fun initialClickListeners() {
-    speechPlayBt.setOnClickListener { checkPermissions() }
-    speechPauseBt.setOnClickListener { }
+    speechMicPlay.setOnClickListener {
+      when (recSpeechStatus) {
+        Constants.REC_STATUS_STOP -> {
+          speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_pause_button))
+          checkPermissions()
+          }
+        Constants.REC_STATUS_PLAY -> {
+          speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
+          pausePressedSubject.onNext(PausePressedIntent)
+        }
+        Constants.REC_STATUS_PAUSE -> {
+          speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
+          checkPermissions()
+        }
+      }
+    }
     speechStopBt.setOnClickListener {
-      if  (idPatient != null)
+      if  (idPatient != null) {
+        speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
         stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString())) }
+      }
     speechPlusBt.setOnClickListener { zoomInSubject.onNext(ZoomInIntent) }
     speechMinusBt.setOnClickListener { zoomOutSubject.onNext(ZoomOutIntent) }
     speechPaintBt.setOnClickListener { showDrawActivity() }
     speechGoodnessBt.setOnClickListener { }
     speechQuestionBt.setOnClickListener { showDialogConfirmSubject.onNext(ShowDialogConfirmIntent(true)) }
-    speechMicPause.setOnClickListener { }
-    speechMicPlay.setOnClickListener { }
     speechKeyboardBt.setOnClickListener { showKeyboardSubject.onNext(ShowKeyboardIntent(!keyboardIsOpen)) }
   }
 
@@ -196,7 +216,6 @@ class SpeechFragment : Fragment(),
       showDialogConfirmSubject.onNext(ShowDialogConfirmIntent(false))
       dialogConfirm.dismiss()
     }
-
   }
 
   private fun showDialogs(showDialogId: Boolean, showDialogConfirm: Boolean) =
@@ -230,10 +249,12 @@ class SpeechFragment : Fragment(),
                   Toast.makeText(activity, getString(string.permissions), Toast.LENGTH_LONG).show()
                 } else {
                     when (recSpeechStatus) {
-                      Constants.REC_STATUS_STOP -> showDialogIdSubject.onNext(ShowDialogIdIntent(true))
+                      Constants.REC_STATUS_STOP -> {
+                        showDialogIdSubject.onNext(ShowDialogIdIntent(true))
+                        speechTextField.text = Editable.Factory.getInstance().newEditable("")
+                      }
                       Constants.REC_STATUS_PAUSE -> playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
                     }
                 }
             }
-
   }

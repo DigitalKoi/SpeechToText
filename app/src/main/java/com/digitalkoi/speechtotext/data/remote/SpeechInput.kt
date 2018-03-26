@@ -1,5 +1,6 @@
 package com.digitalkoi.speechtotext.data.remote
 
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
 
@@ -11,5 +12,5 @@ interface SpeechInput {
 
   fun startListener(): Flowable<String>
 
-  fun stopListener()
+  fun stopListener(): Completable
 }
