@@ -1,6 +1,6 @@
 package com.digitalkoi.speechtotext.speech
 
-import com.digitalkoi.speechtotext.data.SpeechRepository
+import com.digitalkoi.speechtotext.data.repository.SpeechRepository
 import com.digitalkoi.speechtotext.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.*
 import com.digitalkoi.speechtotext.speech.SpeechResult.ShowViewResult.ShowDialogConfirmResult

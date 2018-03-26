@@ -45,7 +45,7 @@ class SpeechViewModel(
   private fun compose(): Observable<SpeechViewState> {
     return intentsSubject
         .compose(intentFilter)
-        .map(this::actionFromIntent)
+        .map { this.actionFromIntent(it) }
         .compose(actionProcessorHolder.actionProcessor)
         .scan(SpeechViewState.idle(), reducer)
         .distinctUntilChanged()

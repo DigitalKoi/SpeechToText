@@ -1,5 +1,6 @@
 package com.digitalkoi.speechtotext.data
 
+import com.digitalkoi.speechtotext.data.file.CSVConversation
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -19,4 +20,6 @@ interface SpeechDataSource {
   fun zoomOut(): Single<Float>
 
   fun getTextSize(): Single<Float>
+
+  fun getListFromFile(date: String): Single<List<CSVConversation>>
 }

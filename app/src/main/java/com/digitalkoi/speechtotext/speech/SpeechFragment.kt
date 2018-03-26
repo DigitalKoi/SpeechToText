@@ -177,11 +177,9 @@ class SpeechFragment : Fragment(),
     dialogPatientOk.setOnClickListener {
       playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString()))
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
-//      dialogId.dismiss()
     }
     dialogPatientCancel.setOnClickListener {
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
-//      dialogId.dismiss()
     }
   }
 
