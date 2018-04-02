@@ -3,6 +3,7 @@ package com.digitalkoi.speechtotext.drawing;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.transition.TransitionManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +39,7 @@ public class DrawActivity extends AppCompatActivity
     private static final int ALPHA_MAX = 255;
     private static final int ALPHA_MIN = 0;
 
+    private Toolbar toolbar;
     private LinearLayout mRoot;
     private FreeDrawView mFreeDrawView;
     private View mSideView;
@@ -54,6 +56,8 @@ public class DrawActivity extends AppCompatActivity
       super.onCreate(savedInstanceState);
       setContentView(R.layout.draw_act);
 
+      toolbar = findViewById(R.id.drawToolbar);
+      setSupportActionBar(toolbar);
       mRoot = (LinearLayout) findViewById(R.id.root);
 
       mImgScreen = (ImageView) findViewById(R.id.img_screen);

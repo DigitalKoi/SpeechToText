@@ -12,5 +12,6 @@ interface SpeechInput {
 
   fun startListener(): Flowable<String>
 
-  fun stopListener(): Completable
+  fun stopListener() : Completable
+
 }

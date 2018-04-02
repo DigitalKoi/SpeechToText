@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical"
-    tools:context=".drawing.DrawActivity">
+    tools:context=".drawing.DrawActivity"
+    >
+
+  <android.support.v7.widget.Toolbar
+      android:id="@+id/drawToolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      app:theme="@style/ToolBarStyle"
+      app:popupTheme="@style/ToolBarPopupStyle"
+      android:elevation="4dp"
+      />
 
   <ImageView
       android:id="@+id/img_screen"

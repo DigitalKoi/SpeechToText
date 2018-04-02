@@ -13,14 +13,14 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:supportsRtl="true"
       android:theme="@style/AppTheme">
-    <activity android:name=".speech.SpeechActivity">
+    <activity android:name="com.digitalkoi.speechtotext.mvi.speech.SpeechActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <activity android:name=".history.HistoryActivity"/>
+    <activity android:name="com.digitalkoi.speechtotext.mvi.history.HistoryActivity"/>
     <activity android:name=".drawing.DrawActivity"/>
   </application>
 
