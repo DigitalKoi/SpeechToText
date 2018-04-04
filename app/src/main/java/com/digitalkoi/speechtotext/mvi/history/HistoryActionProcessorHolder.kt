@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.history
 
 import com.digitalkoi.speechtotext.data.file.CSVConversation
-import com.digitalkoi.speechtotext.data.repository.SpeechRepository
+import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer

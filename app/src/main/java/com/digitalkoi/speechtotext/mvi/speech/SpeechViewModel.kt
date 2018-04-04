@@ -56,7 +56,7 @@ class SpeechViewModel(
   private fun actionFromIntent(intent: SpeechIntent): SpeechAction {
     return when (intent) {
       is InitialIntent ->  FontSizeAction
-      is PlayPressedIntent -> PlayPressedAction(intent.patientId)
+      is PlayPressedIntent -> PlayPressedAction(intent.patientId, intent.text)
       is StopPressedIntent -> StopPressedAction(intent.id, intent.text)
       is PausePressedIntent -> PausePressedAction
       is ZoomInIntent -> SpeechAction.FontSizeInAction

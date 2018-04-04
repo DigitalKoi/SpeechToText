@@ -2,7 +2,7 @@ package com.digitalkoi.speechtotext.di
 
 import android.content.Context
 import com.digitalkoi.speechtotext.data.local.SpeechLocalDataSource
-import com.digitalkoi.speechtotext.data.repository.SpeechRepository
+import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.data.remote.SpeechRemoteDataSource
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import com.digitalkoi.speechtotext.util.schedulers.SchedulerProvider

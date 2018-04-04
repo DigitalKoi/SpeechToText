@@ -16,6 +16,7 @@ import io.reactivex.Flowable.defer
 import io.reactivex.FlowableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
 
@@ -32,70 +33,65 @@ class SpeechRemoteDataSource(
   private var listener: RecognitionListener? = null
   private val disposable = CompositeDisposable()
 
-  val flowable = Flowable.create({ emitter: FlowableEmitter<String> ->
-
-    listener = object : RecognitionListener {
-      override fun onReadyForSpeech(params: Bundle?) {
-        Log.i("RemoteDate", "onReadyForSpeech")
-      }
-
-      override fun onRmsChanged(rmsdB: Float) {
-        Log.i("RemoteDate", "onRmsChanged")
-      }
-
-      override fun onBufferReceived(buffer: ByteArray?) {
-        Log.i("RemoteDate", "onBufferReceived")
-      }
-
-      override fun onPartialResults(partialResults: Bundle?) {
-        Log.i("RemoteDate", "onPartialResults")
-      }
-
-      override fun onEvent(eventType: Int, params: Bundle?) {
-        Log.i("RemoteDate", "onEvent")
-
-      }
-
-      override fun onBeginningOfSpeech() {
-        Log.i("RemoteDate", "onBeginningOfSpeech")
-      }
-
-      override fun onEndOfSpeech() {
-        Log.i("RemoteDate", "onEndOfSpeech")
-      }
-
-      override fun onError(error: Int) {
-        Log.e("RemoteDate", "onError: $error")
-        emitter.onError(Throwable(error.toString()))
-      }
-
-      override fun onResults(results: Bundle?) {
-        val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)[0] ?: ""
-        emitter.onNext(matches)
-      }
-    }
-    speech.setRecognitionListener(listener)
-    emitter.setCancellable { speech.cancel() }
-
-  }, BUFFER).subscribeOn(AndroidSchedulers.mainThread())
-
   override fun startListener(): Flowable<String> {
     val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
     recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en")
     speech.startListening(recognizerIntent)
 
-    return defer { flowable }.debounce(500, MILLISECONDS).retry()
+    return Flowable.create({ emitter: FlowableEmitter<String> ->
+
+      listener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle?) {
+          Log.i("RemoteDate", "onReadyForSpeech")
+        }
+
+        override fun onRmsChanged(rmsdB: Float) {
+          Log.i("RemoteDate", "onRmsChanged")
+        }
+
+        override fun onBufferReceived(buffer: ByteArray?) {
+          Log.i("RemoteDate", "onBufferReceived")
+        }
+
+        override fun onPartialResults(partialResults: Bundle?) {
+          Log.i("RemoteDate", "onPartialResults")
+        }
+
+        override fun onEvent(eventType: Int, params: Bundle?) {
+          Log.i("RemoteDate", "onEvent")
+
+        }
+
+        override fun onBeginningOfSpeech() {
+          Log.i("RemoteDate", "onBeginningOfSpeech")
+        }
+
+        override fun onEndOfSpeech() {
+          Log.i("RemoteDate", "onEndOfSpeech")
+        }
+
+        override fun onError(error: Int) {
+          Log.e("RemoteDate", "onError: $error")
+          emitter.onError(Throwable(error.toString()))
+//          speech.stopListening()
+        }
+
+        override fun onResults(results: Bundle?) {
+          val result = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)[0] ?: ""
+          emitter.onNext(result)
+          emitter.onComplete()
+          Log.i("onResults", emitter.isCancelled.toString())
+        }
+      }
+      speech.setRecognitionListener(listener)
+      emitter.setCancellable { speech.cancel() }
+
+    }, BUFFER)
   }
 
   override fun stopListener(): Completable {
     speech.stopListening()
     return Completable.complete()
-  }
-
-  private fun restartListener() {
-    speech.stopListening()
-    flowable.blockingLast()
-    startListener()
   }
 
   companion object : SingletonHolderDoubleArg<SpeechRemoteDataSource, Context, BaseSchedulerProvider>(

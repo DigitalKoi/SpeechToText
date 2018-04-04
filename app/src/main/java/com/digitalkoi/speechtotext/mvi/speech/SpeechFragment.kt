@@ -132,10 +132,10 @@ class SpeechFragment : Fragment(),
     recSpeechStatus = state.recSpeechStatus
     idPatient = state.idPatient
 
-    if (!TextUtils.isEmpty(state.text) && !text.equals(state.text)) {
-      if (!text.equals("")) text += ", " + state.text
-      else text = state.text!!
-      speechTextField.setText(text, EDITABLE)
+    if (!TextUtils.isEmpty(state.text)) {
+      speechTextField.setText(state.text, EDITABLE)
+    } else {
+      speechTextField.setText("", EDITABLE)
     }
 
     if (state.error != null) {
@@ -145,7 +145,7 @@ class SpeechFragment : Fragment(),
           showToast("No recognition result matched")
           pausePressedSubject.onNext(PausePressedIntent)
           Observable.just(
-          playPressedSubject.onNext(PlayPressedIntent(idPatient!!))).delay(1, SECONDS)
+          playPressedSubject.onNext(PlayPressedIntent(idPatient!!, speechTextField.text.toString()))).delay(1, SECONDS)
         }
       }
       Log.e("error", state.error.toString())
@@ -233,7 +233,7 @@ class SpeechFragment : Fragment(),
     //TODO: clear text field
     dialogPatientIdEdit.setText("", TextView.BufferType.EDITABLE)
     dialogPatientOk.setOnClickListener {
-      playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString()))
+      playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString(), speechTextField.text.toString()))
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
     }
     dialogPatientCancel.setOnClickListener {
@@ -316,7 +316,9 @@ class SpeechFragment : Fragment(),
                         speechTextField.text = Editable.Factory.getInstance().newEditable("")
                       }
                       Constants.REC_STATUS_PAUSE ->
-                        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+                        playPressedSubject.onNext(PlayPressedIntent(
+                            idPatient!!, speechTextField.text.toString()
+                        ))
                     }
                 }
             }

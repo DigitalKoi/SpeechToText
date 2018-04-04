@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
 import android.text.TextUtils
-import com.digitalkoi.speechtotext.data.repository.SpeechRepository
+import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.mvi.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.ShowViewResult.ShowDialogConfirmResult
@@ -11,7 +11,6 @@ import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.ShowViewResult.ShowKe
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.ObservableTransformer
 import io.reactivex.Observable
-import java.util.concurrent.TimeUnit.SECONDS
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -27,7 +26,10 @@ class SpeechActionProcessorHolder(
       actions.flatMap { action ->
         speechRepository.startListener()
             .toObservable()
-            .map { text -> LoadSpeechResult.Success(action.id, text) }
+            .map { text ->
+              if (TextUtils.isEmpty(action.text)) { text }
+              else { action.text + ", " + text } }
+            .map { text ->  LoadSpeechResult.Success(action.id, text) }
             .cast(LoadSpeechResult::class.java)
             .onErrorReturn(LoadSpeechResult::Failure)
             .subscribeOn(schedulerProvider.io())
@@ -48,7 +50,8 @@ class SpeechActionProcessorHolder(
   private val pausePressedProcessor =
     ObservableTransformer<PausePressedAction, PauseSpeechResult> { actions ->
       actions.flatMap {
-                Observable.just(PauseSpeechResult)
+        speechRepository.stopListener()
+            .andThen(Observable.just(PauseSpeechResult))
           }
     }
 
