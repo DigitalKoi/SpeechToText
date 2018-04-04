@@ -24,10 +24,7 @@ open class SpeechRepository private constructor(
   override fun startListener(): Flowable<String> {
     stopListener = false
     return Flowable.defer {
-      Flowable.defer {
-        speechRemoteDataSource.startListener().debounce(1, SECONDS)
-      }
-          .retry()
+      Flowable.defer { speechRemoteDataSource.startListener().debounce(1, SECONDS) }.retry()
     }
         .debounce(1, SECONDS)
         .repeatUntil { stopListener }
