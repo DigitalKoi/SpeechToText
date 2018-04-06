@@ -26,13 +26,13 @@ class SpeechActionProcessorHolder(
       actions.flatMap { action ->
         speechRepository.startListener()
             .toObservable()
-            .map { text ->
-              if (TextUtils.isEmpty(action.text)) { text }
-              else { action.text + ", " + text } }
+//            .map { text ->
+//              if (TextUtils.isEmpty(action.text)) { text }
+//              else { action.text + ", " + text } }
             .map { text ->  LoadSpeechResult.Success(action.id, text) }
             .cast(LoadSpeechResult::class.java)
             .onErrorReturn(LoadSpeechResult::Failure)
-            .subscribeOn(schedulerProvider.io())
+            .subscribeOn(schedulerProvider.ui())
             .observeOn(schedulerProvider.ui())
             .startWith(LoadSpeechResult.InFlight)
       }

@@ -13,9 +13,11 @@ import io.reactivex.BackpressureStrategy.BUFFER
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Flowable.defer
+import io.reactivex.Flowable.empty
 import io.reactivex.FlowableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
@@ -31,15 +33,8 @@ class SpeechRemoteDataSource(
 
   private val speech: SpeechRecognizer by lazy { SpeechRecognizer.createSpeechRecognizer(context) }
   private var listener: RecognitionListener? = null
-  private val disposable = CompositeDisposable()
-
-  override fun startListener(): Flowable<String> {
-    val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-    recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en")
-    speech.startListening(recognizerIntent)
-
-    return Flowable.create({ emitter: FlowableEmitter<String> ->
-
+  private val disposible = CompositeDisposable()
+  private var flowable = Flowable.create({ emitter: FlowableEmitter<String> ->
       listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
           Log.i("RemoteDate", "onReadyForSpeech")
@@ -57,9 +52,8 @@ class SpeechRemoteDataSource(
           Log.i("RemoteDate", "onPartialResults")
         }
 
-        override fun onEvent(eventType: Int, params: Bundle?) {
+        override fun onEvent(eventType: Int, params: Bundle? ) {
           Log.i("RemoteDate", "onEvent")
-
         }
 
         override fun onBeginningOfSpeech() {
@@ -72,25 +66,31 @@ class SpeechRemoteDataSource(
 
         override fun onError(error: Int) {
           Log.e("RemoteDate", "onError: $error")
+          if (error == 100500) emitter.onComplete()
           emitter.onError(Throwable(error.toString()))
-//          speech.stopListening()
         }
 
         override fun onResults(results: Bundle?) {
           val result = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)[0] ?: ""
           emitter.onNext(result)
-          emitter.onComplete()
-          Log.i("onResults", emitter.isCancelled.toString())
         }
       }
-      speech.setRecognitionListener(listener)
-      emitter.setCancellable { speech.cancel() }
+    emitter.setCancellable { speech.cancel() }
 
     }, BUFFER)
+
+  override fun startListener(): Flowable<String> {
+    val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+    recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en")
+    speech.setRecognitionListener(listener)
+    speech.startListening(recognizerIntent)
+    return defer { flowable.doOnEach { speech.startListening(recognizerIntent) } }
+        .retry()
   }
 
   override fun stopListener(): Completable {
-    speech.stopListening()
+    disposible.clear()
+    speech.cancel()
     return Completable.complete()
   }
 

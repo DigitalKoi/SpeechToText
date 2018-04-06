@@ -19,20 +19,12 @@ open class SpeechRepository private constructor(
   private val speechLocalDataSource: SpeechDataSource
 ) : SpeechDataSource, SpeechInput {
 
-  private var stopListener = true
 
   override fun startListener(): Flowable<String> {
-    stopListener = false
-    return Flowable.defer {
-      Flowable.defer { speechRemoteDataSource.startListener().debounce(1, SECONDS) }.retry()
-    }
-        .debounce(1, SECONDS)
-        .repeatUntil { stopListener }
-        .subscribeOn(AndroidSchedulers.mainThread())
+    return speechRemoteDataSource.startListener()
   }
 
   override fun stopListener(): Completable {
-    stopListener = true
     return speechRemoteDataSource.stopListener()
   }
 
@@ -41,6 +33,7 @@ open class SpeechRepository private constructor(
     conversation: String
   ): Completable {
     FileCSVHelper.writeFile(patientId, conversation)
+    stopListener()
     return Completable.complete()
   }
 

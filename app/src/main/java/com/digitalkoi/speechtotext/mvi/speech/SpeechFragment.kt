@@ -18,6 +18,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.text.TextUtils
+import android.text.method.TextKeyListener
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -139,14 +140,10 @@ class SpeechFragment : Fragment(),
     }
 
     if (state.error != null) {
-      val error = state.error.message
+      val error = state.error.toString()
       when (error) {
-        SpeechRecognizer.ERROR_NO_MATCH.toString() -> {
-          showToast("No recognition result matched")
-          pausePressedSubject.onNext(PausePressedIntent)
-          Observable.just(
-          playPressedSubject.onNext(PlayPressedIntent(idPatient!!, speechTextField.text.toString()))).delay(1, SECONDS)
-        }
+        SpeechRecognizer.ERROR_NO_MATCH.toString() -> showToast("No recognition result matched")
+//        SpeechRecognizer.ERROR_SPEECH_TIMEOUT.toString() ->
       }
       Log.e("error", state.error.toString())
       showToast(state.error.toString()) //return for fatal error
@@ -231,7 +228,7 @@ class SpeechFragment : Fragment(),
     val dialogPatientCancel = view.findViewById<View>(R.id.dialogPatientCancel)
     val dialogPatientIdEdit = view.findViewById<EditText>(R.id.dialogPatientIdEd)
     //TODO: clear text field
-    dialogPatientIdEdit.setText("", TextView.BufferType.EDITABLE)
+    TextKeyListener.clear(dialogPatientIdEdit.text)
     dialogPatientOk.setOnClickListener {
       playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString(), speechTextField.text.toString()))
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
