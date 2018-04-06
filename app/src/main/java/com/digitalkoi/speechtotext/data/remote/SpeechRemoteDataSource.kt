@@ -13,14 +13,8 @@ import io.reactivex.BackpressureStrategy.BUFFER
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Flowable.defer
-import io.reactivex.Flowable.empty
 import io.reactivex.FlowableEmitter
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.concurrent.TimeUnit.SECONDS
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 17/03/18.
@@ -34,6 +28,9 @@ class SpeechRemoteDataSource(
   private val speech: SpeechRecognizer by lazy { SpeechRecognizer.createSpeechRecognizer(context) }
   private var listener: RecognitionListener? = null
   private val disposible = CompositeDisposable()
+  val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+
+
   private var flowable = Flowable.create({ emitter: FlowableEmitter<String> ->
       listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
@@ -41,7 +38,7 @@ class SpeechRemoteDataSource(
         }
 
         override fun onRmsChanged(rmsdB: Float) {
-          Log.i("RemoteDate", "onRmsChanged")
+         // Log.i("RemoteDate", "onRmsChanged")
         }
 
         override fun onBufferReceived(buffer: ByteArray?) {
@@ -72,18 +69,21 @@ class SpeechRemoteDataSource(
 
         override fun onResults(results: Bundle?) {
           val result = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)[0] ?: ""
+          Log.i("RemoteDate", "onResults: $result")
           emitter.onNext(result)
         }
       }
+
+    speech.setRecognitionListener(listener)
+    speech.startListening(recognizerIntent)
     emitter.setCancellable { speech.cancel() }
 
     }, BUFFER)
 
   override fun startListener(): Flowable<String> {
-    val recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+    Log.i("RemoteDate", "startListener")
     recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en")
-    speech.setRecognitionListener(listener)
-    speech.startListening(recognizerIntent)
+
     return defer { flowable.doOnEach { speech.startListening(recognizerIntent) } }
         .retry()
   }

@@ -2,56 +2,46 @@ package com.digitalkoi.speechtotext.mvi.speech
 
 import android.Manifest.permission
 import android.annotation.SuppressLint
-import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.view.View
-import com.digitalkoi.speechtotext.mvi.MviView
-import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
-import kotlin.LazyThreadSafetyMode.NONE
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Bundle
 import android.speech.SpeechRecognizer
+import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatDelegate
 import android.text.Editable
 import android.text.TextUtils
 import android.text.method.TextKeyListener
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.TextView.BufferType.EDITABLE
 import android.widget.Toast
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.R.layout
 import com.digitalkoi.speechtotext.R.string
 import com.digitalkoi.speechtotext.drawing.DrawActivity
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.InitialIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.PausePressedIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.PlayPressedIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowDialogConfirmIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowDialogGoodnessIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowDialogIdIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowKeyboardIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.StopPressedIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ZoomInIntent
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ZoomOutIntent
+import com.digitalkoi.speechtotext.mvi.MviView
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.*
 import com.digitalkoi.speechtotext.util.Constants
 import com.digitalkoi.speechtotext.util.ViewModelFactory
 import com.hsalf.smilerating.SmileRating
+import com.tbruyelle.rxpermissions2.RxPermissions
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.speech_frag.*
-import kotlin.properties.Delegates
-import com.tbruyelle.rxpermissions2.RxPermissions
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.Unregistrar
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
-import java.util.concurrent.TimeUnit.SECONDS
+import kotlin.LazyThreadSafetyMode.NONE
+import kotlin.properties.Delegates
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -91,6 +81,8 @@ class SpeechFragment : Fragment(),
 
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    //vector drawables support for API lower than 21
+    AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     return inflater?.inflate(layout.speech_frag, container, false)
   }
 
