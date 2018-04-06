@@ -227,7 +227,7 @@ class SpeechFragment : Fragment(),
     val dialogPatientOk = view.findViewById<View>(R.id.dialogPatientOk)
     val dialogPatientCancel = view.findViewById<View>(R.id.dialogPatientCancel)
     val dialogPatientIdEdit = view.findViewById<EditText>(R.id.dialogPatientIdEd)
-    //TODO: clear text field
+    
     TextKeyListener.clear(dialogPatientIdEdit.text)
     dialogPatientOk.setOnClickListener {
       playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString(), speechTextField.text.toString()))
