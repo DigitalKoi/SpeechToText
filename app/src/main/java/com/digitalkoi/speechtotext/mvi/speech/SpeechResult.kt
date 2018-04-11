@@ -16,7 +16,7 @@ sealed class SpeechResult : MviResult {
 
   object SaveSpeechResult : SpeechResult()
 
-  object PauseSpeechResult : SpeechResult()
+  data class PauseSpeechResult(val state: Int) : SpeechResult()
 
   sealed class FontSizeResult : SpeechResult() {
     data class Success(val fontSize: Float) : FontSizeResult()

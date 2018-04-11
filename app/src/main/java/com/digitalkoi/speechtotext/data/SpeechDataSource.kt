@@ -22,4 +22,10 @@ interface SpeechDataSource {
   fun getTextSize(): Single<Float>
 
   fun getListFromFile(date: String): Single<List<CSVConversation>>
+
+  fun getItemFromFile(id: String): Single<CSVConversation>
+
+  fun deleteItemFromFile(item: CSVConversation): Completable
+
+  fun saveItemToFile(item: CSVConversation): Completable
 }

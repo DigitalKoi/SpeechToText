@@ -3,9 +3,11 @@ package com.digitalkoi.speechtotext.mvi.speech
 import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.media.AudioManager
 import android.os.Bundle
 import android.speech.SpeechRecognizer
 import android.support.v4.app.Fragment
@@ -21,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ScrollView
 import android.widget.TextView.BufferType.EDITABLE
 import android.widget.Toast
 import com.digitalkoi.speechtotext.R
@@ -41,7 +44,6 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.Unregistrar
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import kotlin.LazyThreadSafetyMode.NONE
-import kotlin.properties.Delegates
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
@@ -73,16 +75,19 @@ class SpeechFragment : Fragment(),
   private val dialogConfirm: AlertDialog by lazy { builder.create() }
   private val dialogGoodness: AlertDialog by lazy { builder.create() }
   private lateinit var unregistrar: Unregistrar
+  private val audioManager: AudioManager by lazy { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+  private val currentVolume: Int by lazy { audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) }
 
-  private var recSpeechStatus: Int by Delegates.notNull()
+  private var recSpeechStatus: Int? = null
   private var keyboardIsOpen = false
   private var idPatient: String? = null
-  private var text: String = ""
+  private var textCurrent: String? = null
+  private var textPreviously: String? = null
 
 
   override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     //vector drawables support for API lower than 21
-    AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     return inflater?.inflate(layout.speech_frag, container, false)
   }
 
@@ -100,6 +105,8 @@ class SpeechFragment : Fragment(),
     super.onDestroy()
     disposable.dispose()
     unregistrar.unregister()
+    if (recSpeechStatus == Constants.REC_STATUS_PLAY)
+      pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_ROTATION))
     showDialogs(false, false, false)
   }
 
@@ -124,21 +131,26 @@ class SpeechFragment : Fragment(),
   override fun render(state: SpeechViewState) {
     recSpeechStatus = state.recSpeechStatus
     idPatient = state.idPatient
-
-    if (!TextUtils.isEmpty(state.text)) {
-      speechTextField.setText(state.text, EDITABLE)
-    } else {
-      speechTextField.setText("", EDITABLE)
+    //TODO: move logic to holder
+    if (!TextUtils.isEmpty(state.text) && !textPreviously.equals(state.text!!)) {
+      textPreviously = state.text
+      if (TextUtils.isEmpty(textCurrent)) {
+        textCurrent = state.text
+        speechTextField.setText(textCurrent, EDITABLE)
+      } else {
+        textCurrent += "; " + state.text
+        speechTextField.setText(textCurrent, EDITABLE)
+        scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
+      }
     }
 
     if (state.error != null) {
       val error = state.error.toString()
       when (error) {
         SpeechRecognizer.ERROR_NO_MATCH.toString() -> showToast("No recognition result matched")
-//        SpeechRecognizer.ERROR_SPEECH_TIMEOUT.toString() ->
       }
       Log.e("error", state.error.toString())
-      showToast(state.error.toString()) //return for fatal error
+      showToast(state.error.toString())
     }
 
     speechTextField.textSize = state.fontSize
@@ -162,6 +174,11 @@ class SpeechFragment : Fragment(),
     disposable.add(viewModel.states().subscribe(this::render))
     viewModel.processIntents(intents())
     initialClickListeners()
+    //TODO: null
+    if (recSpeechStatus != null && recSpeechStatus == Constants.REC_STATUS_ROTATION) {
+      playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+      changeIconPlayButton(Constants.REC_STATUS_PLAY)
+    }
     unregistrar = KeyboardVisibilityEvent.registerEventListener(
         activity, { if (!it) { showKeyboardSubject.onNext(ShowKeyboardIntent(false)) }}
     )
@@ -180,34 +197,42 @@ class SpeechFragment : Fragment(),
 
   private fun initialClickListeners() {
     speechMicPlay.setOnClickListener {
-      when (recSpeechStatus) {
+      when (recSpeechStatus!!) {
         Constants.REC_STATUS_STOP -> {
-          speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_pause_button))
           checkPermissions()
           }
         Constants.REC_STATUS_PLAY -> {
-          speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
-          pausePressedSubject.onNext(PausePressedIntent)
+          pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_PAUSE))
+          changeIconPlayButton(Constants.REC_STATUS_PAUSE)
         }
         Constants.REC_STATUS_PAUSE -> {
-          speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_pause_button))
           checkPermissions()
         }
       }
     }
     speechStopBt.setOnClickListener {
-      if  (Constants.REC_STATUS_STOP != recSpeechStatus) {
-        stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString())) }
-        speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
+      if  (Constants.REC_STATUS_STOP != recSpeechStatus!!) {
+        stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString()))
+        changeIconPlayButton(Constants.REC_STATUS_STOP)
+        speechTextField.text = Editable.Factory.getInstance().newEditable("")
+        textCurrent = ""
+        textPreviously = ""
+        restoreVolumeLevel()
+      }
     }
     speechPlusBt.setOnClickListener { zoomInSubject.onNext(ZoomInIntent) }
     speechMinusBt.setOnClickListener { zoomOutSubject.onNext(ZoomOutIntent) }
     speechPaintBt.setOnClickListener { showDrawActivity() }
-    speechGoodnessBt.setOnClickListener { showDialogGoodnessSubject.onNext(
-        ShowDialogGoodnessIntent(true)
-    ) }
+    speechGoodnessBt.setOnClickListener { showDialogGoodnessSubject.onNext(ShowDialogGoodnessIntent(true)) }
     speechQuestionBt.setOnClickListener { showDialogConfirmSubject.onNext(ShowDialogConfirmIntent(true)) }
     speechKeyboardBt.setOnClickListener { showKeyboardSubject.onNext(ShowKeyboardIntent(!keyboardIsOpen)) }
+  }
+
+  private fun changeIconPlayButton(status: Int) {
+    when (status) {
+      Constants.REC_STATUS_PLAY -> speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_pause_button))
+      else -> speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
+    }
   }
 
   private fun initialDialogId() {
@@ -222,8 +247,14 @@ class SpeechFragment : Fragment(),
     
     TextKeyListener.clear(dialogPatientIdEdit.text)
     dialogPatientOk.setOnClickListener {
-      playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString(), speechTextField.text.toString()))
-      showDialogIdSubject.onNext(ShowDialogIdIntent(false))
+      if (TextUtils.isEmpty(dialogPatientIdEdit.text.toString())) {
+        showToast("Input patient ID please")
+      } else {
+        muteBeep()
+        playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString()))
+        showDialogIdSubject.onNext(ShowDialogIdIntent(false))
+        changeIconPlayButton(Constants.REC_STATUS_PLAY)
+      }
     }
     dialogPatientCancel.setOnClickListener {
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
@@ -270,12 +301,13 @@ class SpeechFragment : Fragment(),
     }
 
   private fun showKeyboard(show: Boolean) {
-    //TODO: fix bag with rotation
     if (show) {
       speechTextField.isClickable = true
       speechTextField.isFocusable = true
       speechTextField.isFocusableInTouchMode = true
+      speechTextField.requestFocus()
       UIUtil.showKeyboard(activity, speechTextField)
+
     } else {
       UIUtil.hideKeyboard(activity)
       speechTextField.isClickable = false
@@ -293,22 +325,29 @@ class SpeechFragment : Fragment(),
     Toast.makeText(activity, error, Toast.LENGTH_LONG).show()
 
   private fun checkPermissions() =
-    rxPermissions.request(permission.RECORD_AUDIO,
-                          permission.WRITE_EXTERNAL_STORAGE)
+    rxPermissions.request(permission.RECORD_AUDIO, permission.WRITE_EXTERNAL_STORAGE)
             .subscribe { granted ->
                 if (!granted) {
                   Toast.makeText(activity, getString(string.permissions), Toast.LENGTH_LONG).show()
                 } else {
+                  muteBeep()
                     when (recSpeechStatus) {
                       Constants.REC_STATUS_STOP -> {
                         showDialogIdSubject.onNext(ShowDialogIdIntent(true))
-                        speechTextField.text = Editable.Factory.getInstance().newEditable("")
                       }
-                      Constants.REC_STATUS_PAUSE ->
-                        playPressedSubject.onNext(PlayPressedIntent(
-                            idPatient!!, speechTextField.text.toString()
-                        ))
+                      Constants.REC_STATUS_PAUSE -> {
+                        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+                        changeIconPlayButton(Constants.REC_STATUS_PLAY)
+                      }
                     }
                 }
             }
-  }
+
+  private fun muteBeep() =
+    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
+
+  private fun restoreVolumeLevel() =
+    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume,
+        AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
+
+}

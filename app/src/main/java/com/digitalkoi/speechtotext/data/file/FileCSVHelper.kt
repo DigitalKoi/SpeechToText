@@ -8,10 +8,8 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 22/03/18.
@@ -22,31 +20,32 @@ class FileCSVHelper {
   companion object {
 
     private val fileDir: File by lazy {
-      File(Environment.getExternalStorageDirectory().absolutePath +
-          File.separator + "CHISI")}
-    private val filePath: String by lazy { Environment.getExternalStorageDirectory().absolutePath +
-        File.separator + "CHISI" +
-        File.separator + "Conversations.csv" }
+      File(
+          Environment.getExternalStorageDirectory().absolutePath +
+              File.separator + "CHISI"
+      )
+    }
+    private val filePath: String by lazy {
+      Environment.getExternalStorageDirectory().absolutePath +
+          File.separator + "CHISI" +
+          File.separator + "Conversations.csv"
+    }
 
-    fun writeFile(
-      patientId: String,
-      conversation: String
-    ) {
+    fun writeFile(patientId: String, conversation: String) {
       existFile()
+      val record =
+        (gettingIdForNextItem() + "," + gettingData() + "," + patientId + "," + conversation)
+            .split(",")
+            .toTypedArray()
       val csvWriter = CSVWriter(FileWriter(filePath, true))
-      val record = (gettingIdFromFile() + "," + gettingData() + "," + patientId + "," + conversation)
-          .split(",").toTypedArray()
       csvWriter.writeNext(record)
       csvWriter.close()
     }
 
     fun readFile(): List<CSVConversation> {
-      var list: List<CSVConversation>
       try {
-//      val fileStream = FileInputStream(file)
-//      val streamReader = InputStreamReader(fileStream, StandardCharsets.UTF_8)
         val csvReader = CSVReader(FileReader(filePath))
-        list = convert(csvReader!!.readAll())
+        var list: List<CSVConversation> = convert(csvReader!!.readAll())
         if (list != null) return list
       } catch (e: IOException) {
         Timber.e(e)
@@ -54,7 +53,57 @@ class FileCSVHelper {
       return listOf()
     }
 
-    private fun gettingIdFromFile(): String {
+    fun gettingItem(id: String): CSVConversation? {
+      readFile().forEach { item ->
+        if (item.serialNumber.equals(id))
+          return item
+      }
+      return null
+    }
+
+    fun savingItem(item: CSVConversation) {
+      var list = ArrayList<CSVConversation>()
+      readFile().forEachIndexed { index, itemFile ->
+        run {
+          if (!item.equals(item))
+            list.add(index, itemFile)
+          else
+            list.add(index, item)
+        }
+      }
+      rewritingFile(list)
+
+    }
+
+    fun deletingItem(item: CSVConversation) {
+      var list = ArrayList<CSVConversation>()
+      readFile().forEachIndexed { index, itemFile ->
+        run {
+          if (!item.equals(item))
+            list.add(index, itemFile)
+        }
+      }
+      rewritingFile(list)
+
+    }
+
+    private fun rewritingFile(list: ArrayList<CSVConversation>) {
+      deleteFile()
+      existFile()
+      val csvWriter = CSVWriter(FileWriter(filePath, true))
+      list.forEach { item ->
+        run {
+          val record =
+            (item.serialNumber + "," + item.time + "," + item.patientId + "," + item.conversation)
+                .split(",")
+                .toTypedArray()
+          csvWriter.writeNext(record)
+        }
+      }
+      csvWriter.close()
+    }
+
+    private fun gettingIdForNextItem(): String {
       try {
         val csvReader = CSVReader(FileReader(filePath))
         return (csvReader.readAll().size + 1).toString()
@@ -88,9 +137,7 @@ class FileCSVHelper {
           Timber.e(e)
         }
       }
-
       val file = File(filePath)
-
       if (!file.exists()) {
         try {
           file.createNewFile()
@@ -100,5 +147,9 @@ class FileCSVHelper {
       }
     }
 
+    private fun deleteFile() {
+      val file = File(filePath)
+      file.delete()
+    }
   }
 }

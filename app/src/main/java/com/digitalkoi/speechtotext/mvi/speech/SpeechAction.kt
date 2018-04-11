@@ -8,14 +8,11 @@ import com.digitalkoi.speechtotext.mvi.MviAction
 
 sealed class SpeechAction : MviAction {
 
-  data class PlayPressedAction(
-    val id: String,
-    val text: String
-  ) : SpeechAction()
+  data class PlayPressedAction(val id: String) : SpeechAction()
 
   data class StopPressedAction(val id: String, val text: String) : SpeechAction()
 
-  object PausePressedAction : SpeechAction()
+  data class PausePressedAction(val status: Int) : SpeechAction()
 
   object FontSizeAction : SpeechAction()
 

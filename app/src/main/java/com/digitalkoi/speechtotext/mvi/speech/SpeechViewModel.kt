@@ -6,7 +6,6 @@ import com.digitalkoi.speechtotext.mvi.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.ShowViewResult.*
-import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_PAUSE
 import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_PLAY
 import com.digitalkoi.speechtotext.util.Constants.Companion.REC_STATUS_STOP
 import com.digitalkoi.speechtotext.util.notOfType
@@ -56,9 +55,9 @@ class SpeechViewModel(
   private fun actionFromIntent(intent: SpeechIntent): SpeechAction {
     return when (intent) {
       is InitialIntent ->  FontSizeAction
-      is PlayPressedIntent -> PlayPressedAction(intent.patientId, intent.text)
+      is PlayPressedIntent -> PlayPressedAction(intent.patientId)
       is StopPressedIntent -> StopPressedAction(intent.id, intent.text)
-      is PausePressedIntent -> PausePressedAction
+      is PausePressedIntent -> PausePressedAction(intent.status)
       is ZoomInIntent -> SpeechAction.FontSizeInAction
       is ZoomOutIntent -> SpeechAction.FontSizeOutAction
       is ShowDialogIdIntent -> SpeechAction.ShowDialogIdAction(intent.showView)
@@ -86,7 +85,7 @@ class SpeechViewModel(
               isLoading = false, recSpeechStatus = REC_STATUS_STOP,
               idPatient = null, text = null)
 
-        is PauseSpeechResult -> previousState.copy(isLoading = false, recSpeechStatus = REC_STATUS_PAUSE)
+        is PauseSpeechResult -> previousState.copy(isLoading = false, recSpeechStatus = result.state)
 
         is FontSizeResult -> when (result) {
           is FontSizeResult.Success -> previousState.copy(

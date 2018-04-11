@@ -1,6 +1,5 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
-import android.text.TextUtils
 import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.mvi.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.*
@@ -26,9 +25,6 @@ class SpeechActionProcessorHolder(
       actions.flatMap { action ->
         speechRepository.startListener()
             .toObservable()
-//            .map { text ->
-//              if (TextUtils.isEmpty(action.text)) { text }
-//              else { action.text + ", " + text } }
             .map { text ->  LoadSpeechResult.Success(action.id, text) }
             .cast(LoadSpeechResult::class.java)
             .onErrorReturn(LoadSpeechResult::Failure)
@@ -41,17 +37,17 @@ class SpeechActionProcessorHolder(
   private val stopPressedProcessor =
     ObservableTransformer<StopPressedAction, SaveSpeechResult> { actions ->
         actions.flatMap { action ->
-              speechRepository.saveSpeech(action.id, action.text
-              ).andThen(Observable.just(SaveSpeechResult))
+              speechRepository.saveSpeech(action.id, action.text)
+                  .andThen(Observable.just(SaveSpeechResult))
             }
       }
 
 
   private val pausePressedProcessor =
     ObservableTransformer<PausePressedAction, PauseSpeechResult> { actions ->
-      actions.flatMap {
+      actions.flatMap { action ->
         speechRepository.stopListener()
-            .andThen(Observable.just(PauseSpeechResult))
+            .andThen(Observable.just(PauseSpeechResult(action.status)))
           }
     }
 

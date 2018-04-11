@@ -29,8 +29,6 @@ public class DrawActivity extends AppCompatActivity
           implements View.OnClickListener, SeekBar.OnSeekBarChangeListener,
   PathRedoUndoCountChangeListener, FreeDrawView.DrawCreatorListener, PathDrawnListener {
 
-    private static final String TAG = DrawActivity.class.getSimpleName();
-
     private static final int THICKNESS_STEP = 2;
     private static final int THICKNESS_MAX = 80;
     private static final int THICKNESS_MIN = 15;

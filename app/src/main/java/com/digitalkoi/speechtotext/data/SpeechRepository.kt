@@ -8,6 +8,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import java.nio.channels.FileLock
 import java.util.concurrent.TimeUnit.SECONDS
 
 /**
@@ -19,6 +20,17 @@ open class SpeechRepository private constructor(
   private val speechLocalDataSource: SpeechDataSource
 ) : SpeechDataSource, SpeechInput {
 
+  override fun getItemFromFile(id: String): Single<CSVConversation> {
+    return speechLocalDataSource.getItemFromFile(id)
+  }
+
+  override fun deleteItemFromFile(item: CSVConversation): Completable {
+    return speechLocalDataSource.deleteItemFromFile(item)
+  }
+
+  override fun saveItemToFile(item: CSVConversation): Completable {
+    return speechLocalDataSource.saveItemToFile(item)
+  }
 
   override fun startListener(): Flowable<String> {
     return speechRemoteDataSource.startListener()
@@ -28,13 +40,9 @@ open class SpeechRepository private constructor(
     return speechRemoteDataSource.stopListener()
   }
 
-  override fun saveSpeech(
-    patientId: String,
-    conversation: String
-  ): Completable {
-    FileCSVHelper.writeFile(patientId, conversation)
+  override fun saveSpeech(patientId: String, conversation: String): Completable {
     stopListener()
-    return Completable.complete()
+    return speechLocalDataSource.saveSpeech(patientId, conversation)
   }
 
   override fun changeSpeechResource(): Completable {
