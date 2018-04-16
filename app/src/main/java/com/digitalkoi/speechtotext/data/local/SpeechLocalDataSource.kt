@@ -19,6 +19,7 @@ class SpeechLocalDataSource private constructor(context: Context) : SpeechDataSo
   private var sharedPreferences: SharedPreferences? = null
   private var fontSize: Float
   private val editor: SharedPreferences.Editor
+  private val fileCSVHelper : FileCSVHelper by lazy { FileCSVHelper() }
 
   init {
     sharedPreferences = context.getSharedPreferences(Constants.APP_SETTINGS, Context.MODE_PRIVATE)
@@ -29,7 +30,7 @@ class SpeechLocalDataSource private constructor(context: Context) : SpeechDataSo
   }
 
   override fun saveSpeech(patientId: String, conversation: String): Completable {
-    FileCSVHelper.writeItemInFile(patientId, conversation)
+    fileCSVHelper.writeItemInFile(patientId, conversation)
     return Completable.complete()
   }
 
@@ -60,20 +61,20 @@ class SpeechLocalDataSource private constructor(context: Context) : SpeechDataSo
   }
 
   override fun getListFromFile(date: String): Single<List<CSVConversation>> {
-    return Single.just(FileCSVHelper.readAllFile(date))
+    return Single.just(fileCSVHelper.readAllFile(date))
   }
 
   override fun getItemFromFile(id: String): Single<CSVConversation> {
-    return Single.just(FileCSVHelper.gettingItem(id))
+    return Single.just(fileCSVHelper.gettingItem(id))
   }
 
   override fun deleteItemFromFile(item: CSVConversation): Completable {
-    FileCSVHelper.deletingItem(item)
+    fileCSVHelper.deletingItem(item)
     return Completable.complete()
   }
 
   override fun saveItemToFile(item: CSVConversation): Completable {
-    FileCSVHelper.savingItem(item)
+    fileCSVHelper.savingItem(item)
     return Completable.complete()
   }
 

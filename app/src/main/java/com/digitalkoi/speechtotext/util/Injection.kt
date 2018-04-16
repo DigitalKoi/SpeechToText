@@ -18,7 +18,8 @@ object Injection {
   fun provideRepository(context: Context): SpeechRepository =
     SpeechRepository.getInstance(
         SpeechRemoteDataSource.getInstance(context),
-        SpeechLocalDataSource.getInstance(context))
+        SpeechLocalDataSource.getInstance(context)
+    )
 
   fun provideSchedulerProvider(): BaseSchedulerProvider = SchedulerProvider
   }
