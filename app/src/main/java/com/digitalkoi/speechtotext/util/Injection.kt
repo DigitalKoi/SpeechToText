@@ -1,4 +1,4 @@
-package com.digitalkoi.speechtotext.di
+package com.digitalkoi.speechtotext.util
 
 import android.content.Context
 import com.digitalkoi.speechtotext.data.local.SpeechLocalDataSource

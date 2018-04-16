@@ -2,21 +2,17 @@ package com.digitalkoi.speechtotext.data.remote
 
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import com.digitalkoi.speechtotext.util.SingletonHolderSingleArg
-import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.BackpressureStrategy.BUFFER
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Flowable.defer
 import io.reactivex.FlowableEmitter
-import io.reactivex.disposables.CompositeDisposable
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 17/03/18.
@@ -37,7 +33,7 @@ class SpeechRemoteDataSource(context: Context) : SpeechInput {
         }
 
         override fun onRmsChanged(rmsdB: Float) {
-          Log.d("onRmsChanged", rmsdB.toString())
+//          Log.d("onRmsChanged", rmsdB.toString())
         }
 
         override fun onBufferReceived(buffer: ByteArray?) {
@@ -62,6 +58,7 @@ class SpeechRemoteDataSource(context: Context) : SpeechInput {
 
         override fun onError(error: Int) {
           Log.e("RemoteDate", "onError: $error")
+          if (error == 8) stopSpeech()
           emitter.onError(Throwable(error.toString()))
         }
 
@@ -90,6 +87,7 @@ class SpeechRemoteDataSource(context: Context) : SpeechInput {
   }
 
   private fun stopSpeech() {
+    speech?.stopListening()
     speech?.cancel()
     speech?.destroy()
     speech = null

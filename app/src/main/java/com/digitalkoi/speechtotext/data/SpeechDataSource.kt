@@ -2,7 +2,6 @@ package com.digitalkoi.speechtotext.data
 
 import com.digitalkoi.speechtotext.data.file.CSVConversation
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 
 /**

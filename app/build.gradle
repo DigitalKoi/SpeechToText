@@ -45,15 +45,10 @@ dependencies {
   implementation 'android.arch.lifecycle:extensions:1.1.0'
   kapt 'android.arch.lifecycle:compiler:1.1.0'
   implementation 'com.jakewharton.timber:timber:4.6.1'
-  implementation 'com.google.dagger:dagger:2.14.1'
-  implementation 'com.google.dagger:dagger-android-support:2.14.1'
-  kapt 'com.google.dagger:dagger-compiler:2.14.1'
-  kapt 'com.google.dagger:dagger-android-processor:2.14.1'
 
   implementation 'com.opencsv:opencsv:4.1'
 
   implementation 'com.github.sujithkanna:smileyrating:1.6.8'
-
 
   implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
   implementation 'com.rm:freedrawview:1.1.2'

@@ -21,11 +21,8 @@ class HistoryActionProcessorHolder(
   private val initialProcessor =
     ObservableTransformer<InitialAction, InitialResult> { actions ->
       actions.flatMap {
-        Observable.zip(
-            speechRepository.getTextSize().toObservable(),
-            speechRepository.getListFromFile("").toObservable(),
-            BiFunction { font: Float, list: List<CSVConversation> -> InitialResult.Success(font, list) }
-        )
+            speechRepository.getTextSize().toObservable()
+                .map { font: Float -> InitialResult.Success(font) }
             .cast(InitialResult::class.java)
             .onErrorReturn(InitialResult::Failure)
             .subscribeOn(schedulerProvider.io())
@@ -33,14 +30,23 @@ class HistoryActionProcessorHolder(
       }
     }
 
-  private val showDialogDateProcessor =
-    ObservableTransformer<ShowDialogDateAction, ShowDateResult> { actions ->
-      actions
-          .flatMap { action ->
-            speechRepository.getListFromFile("22/03/2018")
-                .toObservable()
-                .map { conversationList -> ShowDateResult.Success(conversationList) }
-          }
+  private val updateListProcessor =
+    ObservableTransformer<UpdateListAction, UpdateListResult> { actions ->
+      actions.flatMap { state ->
+        speechRepository.getListFromFile(state.date)
+            .toObservable()
+            .map { list -> UpdateListResult(list, state.date) }
+            .subscribeOn(schedulerProvider.io())
+            .observeOn(schedulerProvider.ui())
+      }
+    }
+
+  private val showDataDialog =
+    ObservableTransformer<ShowDataPickerAction, ShowDataPickerResult> { actions ->
+      actions.map { state ->
+        ShowDataPickerResult(state.showDataPickerAction)}
+          .subscribeOn(schedulerProvider.io())
+          .observeOn(schedulerProvider.ui())
     }
 
   internal var actionProcessor =
@@ -48,7 +54,8 @@ class HistoryActionProcessorHolder(
       actions.publish { shared ->
         Observable.merge(
             shared.ofType(InitialAction::class.java).compose(initialProcessor),
-            shared.ofType(ShowDialogDateAction::class.java).compose(showDialogDateProcessor)
+            shared.ofType(UpdateListAction::class.java).compose(updateListProcessor),
+            shared.ofType(ShowDataPickerAction::class.java).compose(showDataDialog)
         )
       }
     }

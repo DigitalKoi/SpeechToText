@@ -29,7 +29,7 @@ class SpeechLocalDataSource private constructor(context: Context) : SpeechDataSo
   }
 
   override fun saveSpeech(patientId: String, conversation: String): Completable {
-    FileCSVHelper.writeFile(patientId, conversation)
+    FileCSVHelper.writeItemInFile(patientId, conversation)
     return Completable.complete()
   }
 
@@ -60,7 +60,7 @@ class SpeechLocalDataSource private constructor(context: Context) : SpeechDataSo
   }
 
   override fun getListFromFile(date: String): Single<List<CSVConversation>> {
-    return Single.just(FileCSVHelper.readFile())
+    return Single.just(FileCSVHelper.readAllFile(date))
   }
 
   override fun getItemFromFile(id: String): Single<CSVConversation> {

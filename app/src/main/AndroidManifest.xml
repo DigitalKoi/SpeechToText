@@ -23,8 +23,9 @@
       </intent-filter>
     </activity>
     <activity android:name="com.digitalkoi.speechtotext.mvi.history.HistoryActivity"/>
-    <activity android:name=".drawing.DrawActivity"/>
+    <activity android:name=".mvi.drawing.DrawActivity"/>
     <activity android:name=".mvi.detail.DetailActivity" />
+    <activity android:name="com.digitalkoi.speechtotext.mvi.about.AboutActivity" />
   </application>
 
 </manifest>

@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import com.digitalkoi.speechtotext.mvi.about.AboutActivity
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.mvi.history.HistoryActivity
 import com.digitalkoi.speechtotext.util.addFragmentToActivity
@@ -29,10 +30,17 @@ class SpeechActivity : AppCompatActivity() {
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    if (item.itemId == R.id.menu_history) {
-      val intent = Intent(this, HistoryActivity::class.java)
-      startActivity(intent)
-      return true
+    when (item.itemId) {
+      R.id.menu_history -> {
+        val intent = Intent(this, HistoryActivity::class.java)
+        startActivity(intent)
+        return true
+      }
+      R.id.menu_about -> {
+        val intent = Intent(this, AboutActivity::class.java)
+        startActivity(intent)
+        return true
+      }
     }
     return super.onOptionsItemSelected(item)
   }

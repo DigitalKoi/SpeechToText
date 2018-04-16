@@ -1,6 +1,7 @@
 package com.digitalkoi.speechtotext.data.file
 
 import android.os.Environment
+import android.text.TextUtils
 import com.opencsv.CSVReader
 import com.opencsv.CSVWriter
 import timber.log.Timber
@@ -28,10 +29,10 @@ class FileCSVHelper {
     private val filePath: String by lazy {
       Environment.getExternalStorageDirectory().absolutePath +
           File.separator + "CHISI" +
-          File.separator + "Conversations.csv"
+          File.separator + "DataLog.csv"
     }
 
-    fun writeFile(patientId: String, conversation: String) {
+    fun writeItemInFile(patientId: String, conversation: String) {
       existFile()
       val record =
         (gettingIdForNextItem() + "," + gettingData() + "," + patientId + "," + conversation)
@@ -42,11 +43,20 @@ class FileCSVHelper {
       csvWriter.close()
     }
 
-    fun readFile(): List<CSVConversation> {
+    fun readAllFile(date: String): List<CSVConversation> {
       try {
         val csvReader = CSVReader(FileReader(filePath))
         var list: List<CSVConversation> = convert(csvReader!!.readAll())
-        if (list != null) return list
+        if (list != null && TextUtils.isEmpty(date)) {
+          return list
+        } else if (!TextUtils.isEmpty(date)) {
+          val listFromDate = ArrayList<CSVConversation>()
+          list.forEach { item ->
+            if (date == item.time.substring(0, 10))
+              listFromDate.add(item)
+          }
+          return listFromDate
+        }
       } catch (e: IOException) {
         Timber.e(e)
       }
@@ -54,7 +64,7 @@ class FileCSVHelper {
     }
 
     fun gettingItem(id: String): CSVConversation? {
-      readFile().forEach { item ->
+      readAllFile("").forEach { item ->
         if (item.serialNumber.equals(id))
           return item
       }
@@ -63,9 +73,9 @@ class FileCSVHelper {
 
     fun savingItem(item: CSVConversation) {
       var list = ArrayList<CSVConversation>()
-      readFile().forEachIndexed { index, itemFile ->
+      readAllFile("").forEachIndexed { index, itemFile ->
         run {
-          if (!item.equals(item))
+          if (!itemFile.serialNumber.equals(item.serialNumber))
             list.add(index, itemFile)
           else
             list.add(index, item)
@@ -77,10 +87,10 @@ class FileCSVHelper {
 
     fun deletingItem(item: CSVConversation) {
       var list = ArrayList<CSVConversation>()
-      readFile().forEachIndexed { index, itemFile ->
+      readAllFile("").forEachIndexed { index, itemFile ->
         run {
-          if (!item.equals(item))
-            list.add(index, itemFile)
+          if (!itemFile.serialNumber.equals(item.serialNumber))
+            list.add(itemFile)
         }
       }
       rewritingFile(list)
@@ -91,7 +101,7 @@ class FileCSVHelper {
       deleteFile()
       existFile()
       val csvWriter = CSVWriter(FileWriter(filePath, true))
-      list.forEach { item ->
+      sortListId(list).forEach { item ->
         run {
           val record =
             (item.serialNumber + "," + item.time + "," + item.patientId + "," + item.conversation)
@@ -127,6 +137,21 @@ class FileCSVHelper {
         }
       }
       return list.toList()
+    }
+
+    private fun sortListId(list:ArrayList<CSVConversation>): ArrayList<CSVConversation> {
+      val sortedList = ArrayList<CSVConversation>()
+      list.forEachIndexed { index, item ->
+        sortedList.add(
+            CSVConversation(
+                (index + 1).toString(),
+                item.time,
+                item.patientId,
+                item.conversation
+                )
+        )
+      }
+      return sortedList
     }
 
     private fun existFile() {

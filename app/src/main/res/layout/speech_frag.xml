@@ -16,7 +16,7 @@
       android:layout_marginStart="16dp"
       android:layout_marginTop="8dp"
       android:fillViewport="true"
-      app:layout_constraintBottom_toTopOf="@+id/speechMicPlay"
+      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toStartOf="@+id/linearLayout"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/speechKeyboardBt"
@@ -54,14 +54,14 @@
       >
 
     <ImageView
-        android:id="@+id/speechStopBt"
-        android:layout_width="match_parent"
+        android:id="@+id/speechPlayBt"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_stop"
+        app:srcCompat="@drawable/shape_play_button"
         />
 
     <ImageView
@@ -71,7 +71,7 @@
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/speechStopBt"
+        app:layout_constraintTop_toBottomOf="@+id/speechPlayBt"
         app:srcCompat="@drawable/ic_plus"
         />
 
@@ -155,22 +155,6 @@
         app:layout_constraintTop_toTopOf="@+id/speechQuestionBt"
         />
   </android.support.constraint.ConstraintLayout>
-
-  <ImageView
-      android:id="@+id/speechMicPlay"
-      android:layout_width="48dp"
-      android:layout_height="48dp"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginTop="8dp"
-      android:visibility="visible"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/scrollView"
-      app:srcCompat="@drawable/shape_play_button"
-      />
 
   <ImageView
       android:id="@+id/speechKeyboardBt"

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical"
-    tools:context=".drawing.DrawActivity"
+    tools:context=".mvi.drawing.DrawActivity"
     >
 
   <android.support.v7.widget.Toolbar
@@ -15,6 +15,7 @@
       android:layout_width="match_parent"
       android:layout_height="?attr/actionBarSize"
       app:theme="@style/ToolBarStyle"
+      app:title="Paint"
       app:popupTheme="@style/ToolBarPopupStyle"
       android:elevation="4dp"
       />

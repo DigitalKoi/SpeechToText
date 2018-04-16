@@ -9,6 +9,6 @@ import com.digitalkoi.speechtotext.mvi.MviAction
 
 sealed class DetailAction : MviAction {
   data class PopulatelAction(val id: String) : DetailAction()
-  data class EditAction(val item: CSVConversation) : DetailAction()
+  data class SaveAction(val item: CSVConversation) : DetailAction()
   data class DeleteAction(val item: CSVConversation) : DetailAction()
 }

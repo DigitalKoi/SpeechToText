@@ -10,7 +10,7 @@ import com.digitalkoi.speechtotext.util.Constants
 data class SpeechViewState(
   val isLoading: Boolean,
     //All about text
-  val text: String?,
+  val text: String,
   val fontSize: Float,
   val idPatient: String?,       //Id patient for saving in file
   val showDialogId: Boolean,
@@ -25,7 +25,7 @@ data class SpeechViewState(
     fun idle(): SpeechViewState {
       return SpeechViewState(
           isLoading = false,
-          text = null,
+          text = "",
           fontSize = Constants.DEFAULT_FONT_SIZE,
           idPatient = null,
           showDialogId = false,

@@ -83,7 +83,7 @@ class SpeechViewModel(
         is SaveSpeechResult ->
           previousState.copy(
               isLoading = false, recSpeechStatus = REC_STATUS_STOP,
-              idPatient = null, text = null)
+              idPatient = null, text = "")
 
         is PauseSpeechResult -> previousState.copy(isLoading = false, recSpeechStatus = result.state)
 

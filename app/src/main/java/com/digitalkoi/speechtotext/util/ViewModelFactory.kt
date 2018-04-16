@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProvider
 import android.content.Context
 import com.digitalkoi.speechtotext.mvi.speech.SpeechActionProcessorHolder
 import com.digitalkoi.speechtotext.mvi.speech.SpeechViewModel
-import com.digitalkoi.speechtotext.di.Injection
 import com.digitalkoi.speechtotext.mvi.detail.DetailActionProcessorHolder
 import com.digitalkoi.speechtotext.mvi.detail.DetailViewModel
 import com.digitalkoi.speechtotext.mvi.history.HistoryActionProcessorHolder

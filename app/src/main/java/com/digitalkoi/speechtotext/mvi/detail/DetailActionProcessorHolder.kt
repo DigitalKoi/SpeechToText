@@ -2,12 +2,11 @@ package com.digitalkoi.speechtotext.mvi.detail
 
 import com.digitalkoi.speechtotext.data.SpeechRepository
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.DeleteAction
-import com.digitalkoi.speechtotext.mvi.detail.DetailAction.EditAction
+import com.digitalkoi.speechtotext.mvi.detail.DetailAction.SaveAction
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.PopulatelAction
 import com.digitalkoi.speechtotext.mvi.detail.DetailResult.DeleteResult
 import com.digitalkoi.speechtotext.mvi.detail.DetailResult.EditResult
 import com.digitalkoi.speechtotext.mvi.detail.DetailResult.PopulateResult
-import com.digitalkoi.speechtotext.util.pairWithDelay
 import com.digitalkoi.speechtotext.util.schedulers.BaseSchedulerProvider
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
@@ -26,7 +25,7 @@ class DetailActionProcessorHolder(
       actions.flatMap { action ->
         repository.getItemFromFile(action.id)
             .toObservable()
-            .map { PopulateResult.Success(it) }
+            .map(PopulateResult::Success)
             .cast(PopulateResult::class.java)
             .onErrorReturn(PopulateResult::Failure)
             .subscribeOn(schedulerProvider.ui())
@@ -36,7 +35,7 @@ class DetailActionProcessorHolder(
     }
 
   private val editProcessor =
-    ObservableTransformer<EditAction, EditResult> { actions ->
+    ObservableTransformer<SaveAction, EditResult> { actions ->
       actions.flatMap { action ->
         repository.saveItemToFile(action.item)
             .andThen(Observable.just(EditResult.Success))
@@ -66,7 +65,7 @@ class DetailActionProcessorHolder(
       action.publish { shared ->
         Observable.merge(
             shared.ofType(PopulatelAction::class.java).compose(populateProcessor),
-            shared.ofType(EditAction::class.java).compose(editProcessor),
+            shared.ofType(SaveAction::class.java).compose(editProcessor),
             shared.ofType(DeleteAction::class.java).compose(deleteProcessor)
         )
       }

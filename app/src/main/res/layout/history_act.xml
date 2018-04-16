@@ -14,9 +14,9 @@
       android:id="@+id/historyToolbar"
       android:layout_width="match_parent"
       app:title="History"
-      android:layout_height="?attr/actionBarSize"
-      style="@style/ToolBarStyle"
       app:theme="@style/ToolBarStyle"
+      app:popupTheme="@style/ToolBarPopupStyle"
+      android:layout_height="?attr/actionBarSize"
       android:elevation="3dp"/>
 
   <FrameLayout

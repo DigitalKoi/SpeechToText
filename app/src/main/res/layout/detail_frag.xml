@@ -2,12 +2,11 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-  <TextView
-      android:id="@+id/detail_id"
+  <EditText
+      android:id="@+id/detail_patientId"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginEnd="8dp"
@@ -19,19 +18,22 @@
       app:layout_constraintTop_toTopOf="parent"
       />
 
-  <TextView
+  <EditText
       android:id="@+id/detail_text"
       android:layout_width="0dp"
       android:layout_height="0dp"
-      android:layout_below="@id/detail_id"
+      android:gravity="left"
+      android:background="@android:color/transparent"
+      android:layout_below="@id/detail_patientId"
       android:layout_marginBottom="8dp"
       android:layout_marginEnd="8dp"
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
+      android:inputType="textMultiLine"
       android:textAppearance="@style/TextAppearance.AppCompat.Body1"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/detail_id"
+      app:layout_constraintTop_toBottomOf="@+id/detail_patientId"
       />
 </android.support.constraint.ConstraintLayout>

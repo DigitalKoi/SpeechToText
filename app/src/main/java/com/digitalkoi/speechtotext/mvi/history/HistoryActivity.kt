@@ -17,7 +17,10 @@ class HistoryActivity : AppCompatActivity() {
     setContentView(R.layout.history_act)
 
     setSupportActionBar(historyToolbar)
-    supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+    supportActionBar?.run {
+      setDisplayHomeAsUpEnabled(true)
+      setDisplayShowHomeEnabled(true)
+    }
 
 
     if (supportFragmentManager.findFragmentById(R.id.historyContainer) == null)

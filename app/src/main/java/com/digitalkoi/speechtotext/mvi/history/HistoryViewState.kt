@@ -12,7 +12,7 @@ data class HistoryViewState(
   val fontSize: Float,
   val dataList: List<CSVConversation>?,
   val showDateDialog: Boolean,
-  val date: String?,
+  val date: String,
     val error: Throwable?
 ) : MviViewState {
   companion object {
@@ -21,7 +21,7 @@ data class HistoryViewState(
           fontSize = Constants.DEFAULT_FONT_SIZE,
           dataList = null,
           showDateDialog = false,
-          date = null,
+          date = "",
           error = null
       )
     }

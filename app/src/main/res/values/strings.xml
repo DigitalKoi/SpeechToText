@@ -4,14 +4,13 @@
   <string name="ok">OK</string>
   <string name="cancel">Cancel</string>
   <string name="enter_patient_id">Enter Patient ID</string>
-  <string name="history">History</string>
 
   <!--For drawing Activity-->
   <string name="show_screenshot">Take Screenshot</string>
   <string name="signature_hint">First and last name</string>
   <string name="age_hint">Age</string>
   <string name="signature_label">Insert your signature here</string>
-  <string name="cancel_all">Cancel all</string>
+  <string name="cancel_all">Clear</string>
   <string name="delete_draw">Delete draw</string>
   <string name="github_hint">Show Git Repository</string>
   <string name="github_url">https://github.com/RiccardoMoro</string>
@@ -22,4 +21,20 @@
   <string name="stroke_width">Stroke width</string>
   <string name="random_color">Random color</string>
   <string name="permissions">Allow access to recording audio and writing data to storage</string>
+
+  <string name="delete_item">Delete record</string>
+  <string name="edit_item">Edit record</string>
+  <string name="save_item">Save record</string>
+
+  <string name="clear_filter">Show all</string>
+
+  <string name="history_item">History</string>
+  <string name="about_item">About</string>
+
+  <string name="about_inventor">CHISI Inventor:</string>
+  <string name="about_inventor_name">Professor Mike Vassallo</string>
+  <string name="about_developed">Developed by:</string>
+  <string name="about_developed_name">Robot Bangla,\nArif Reza Anwary</string>
+  <string name="about_patient">Patent:</string>
+  <string name="about_patient_name">(Pending)</string>
 </resources>

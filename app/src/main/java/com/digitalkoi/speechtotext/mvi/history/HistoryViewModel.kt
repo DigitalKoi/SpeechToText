@@ -1,17 +1,22 @@
 package com.digitalkoi.speechtotext.mvi.history
 
 import android.arch.lifecycle.ViewModel
-import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.*
-import com.digitalkoi.speechtotext.mvi.history.HistoryAction.*
-import com.digitalkoi.speechtotext.mvi.history.HistoryResult.*
-import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.ShowDateIntent
+import com.digitalkoi.speechtotext.mvi.MviViewModel
+import com.digitalkoi.speechtotext.mvi.history.HistoryAction.InitialAction
+import com.digitalkoi.speechtotext.mvi.history.HistoryAction.ShowDataPickerAction
+import com.digitalkoi.speechtotext.mvi.history.HistoryAction.UpdateListAction
+import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.InitialIntent
+import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.ShowDataPickerIntent
+import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.UpdateListIntent
+import com.digitalkoi.speechtotext.mvi.history.HistoryResult.InitialResult
 import com.digitalkoi.speechtotext.mvi.history.HistoryResult.InitialResult.Failure
 import com.digitalkoi.speechtotext.mvi.history.HistoryResult.InitialResult.Success
-import com.digitalkoi.speechtotext.mvi.MviViewModel
-import com.digitalkoi.speechtotext.util.notOfType
+import com.digitalkoi.speechtotext.mvi.history.HistoryResult.ShowDataPickerResult
+import com.digitalkoi.speechtotext.mvi.history.HistoryResult.UpdateListResult
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.ofType
 import io.reactivex.subjects.PublishSubject
 
 /**
@@ -35,8 +40,9 @@ class HistoryViewModel(
   get() = ObservableTransformer { intents ->
     intents.publish { shared ->
       Observable.merge(
-          shared.ofType(HistoryIntent.InitialIntent::class.java).take(1),
-          shared.notOfType(HistoryIntent.InitialIntent::class.java)
+          shared.ofType(InitialIntent::class.java).take(1),
+          shared.ofType(UpdateListIntent::class.java),
+          shared.ofType(ShowDataPickerIntent::class.java)
       )
     }
   }
@@ -44,7 +50,7 @@ class HistoryViewModel(
   private fun compose(): Observable<HistoryViewState> {
     return intentSubject
         .compose(intentFilter)
-        .map { this.actionFromIntent(it) }
+        .map(this::actionFromIntent)
         .compose(actionProcessorHolder.actionProcessor)
         .scan(HistoryViewState.idle(), reducer)
         .distinctUntilChanged()
@@ -55,7 +61,8 @@ class HistoryViewModel(
   private fun actionFromIntent(intent: HistoryIntent): HistoryAction {
     return when(intent) {
       is InitialIntent -> InitialAction
-      is ShowDateIntent -> ShowDialogDateAction(intent.date)
+      is UpdateListIntent -> UpdateListAction(intent.date)
+      is ShowDataPickerIntent -> ShowDataPickerAction(intent.showDataPickerDialog)
     }
   }
 
@@ -65,12 +72,10 @@ class HistoryViewModel(
       when (result) {
         is InitialResult -> when (result) {
           is Failure -> previousState.copy(error = result.error)
-          is Success -> previousState.copy(fontSize = result.fontSize, dataList = result.dataList)
+          is Success -> previousState.copy(fontSize = result.fontSize)
         }
-        is ShowDateResult -> when (result) {
-          is ShowDateResult.Failure -> previousState.copy(error = result.error)
-          is ShowDateResult.Success -> previousState.copy(dataList = result.dataList)
-        }
+        is UpdateListResult -> previousState.copy(dataList = result.dataList, date = result.date)
+        is ShowDataPickerResult -> previousState.copy(showDateDialog = result.showDataPickerDialog)
       }
     }
   }

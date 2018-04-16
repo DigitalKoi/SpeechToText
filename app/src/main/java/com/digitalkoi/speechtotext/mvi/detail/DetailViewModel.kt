@@ -3,10 +3,10 @@ package com.digitalkoi.speechtotext.mvi.detail
 import android.arch.lifecycle.ViewModel
 import com.digitalkoi.speechtotext.mvi.MviViewModel
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.DeleteAction
-import com.digitalkoi.speechtotext.mvi.detail.DetailAction.EditAction
+import com.digitalkoi.speechtotext.mvi.detail.DetailAction.SaveAction
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.PopulatelAction
 import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.DeleteIntent
-import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.EditIntent
+import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.SaveIntent
 import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.InitialIntent
 import com.digitalkoi.speechtotext.mvi.detail.DetailResult.DeleteResult
 import com.digitalkoi.speechtotext.mvi.detail.DetailResult.EditResult
@@ -45,7 +45,7 @@ class DetailViewModel(
   private fun compose(): Observable<DetailViewState> {
     return intentsSubject
         .compose(intentFilter)
-        .map(this::actionFromIntent)
+        .map { this.actionFromIntent(it) }
         .compose(actionProcessorHolder.actionProcessor)
         .scan(DetailViewState.idle(), reducer)
         .distinctUntilChanged()
@@ -56,7 +56,7 @@ class DetailViewModel(
   private fun actionFromIntent(intent: DetailIntent): DetailAction {
     return when (intent) {
       is InitialIntent -> PopulatelAction(intent.id)
-      is EditIntent -> EditAction(intent.item)
+      is SaveIntent -> SaveAction(intent.item)
       is DeleteIntent -> DeleteAction(intent.item)
     }
   }

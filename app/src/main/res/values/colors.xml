@@ -5,6 +5,7 @@
     <color name="colorAccent">#4e4e4e</color>
     <!--<color name="colorAccent">#FF4081</color>-->
 
+    <item name="about_text" type="color">#9effffff</item>
 
     <color name="colorRightPanelBackground">#454545</color>
     <color name="colorRightPanelButtonRed">#cc0000</color>

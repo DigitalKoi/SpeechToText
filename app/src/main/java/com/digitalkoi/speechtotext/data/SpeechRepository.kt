@@ -1,15 +1,11 @@
 package com.digitalkoi.speechtotext.data
 
 import com.digitalkoi.speechtotext.data.file.CSVConversation
-import com.digitalkoi.speechtotext.data.file.FileCSVHelper
 import com.digitalkoi.speechtotext.data.remote.SpeechInput
 import com.digitalkoi.speechtotext.util.SingletonHolderDoubleArg
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import java.nio.channels.FileLock
-import java.util.concurrent.TimeUnit.SECONDS
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.

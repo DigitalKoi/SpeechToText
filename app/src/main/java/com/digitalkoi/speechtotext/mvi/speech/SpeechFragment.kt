@@ -1,7 +1,6 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
 import android.Manifest.permission
-import android.annotation.SuppressLint
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Bundle
-import android.speech.SpeechRecognizer
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -29,9 +27,18 @@ import android.widget.Toast
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.R.layout
 import com.digitalkoi.speechtotext.R.string
-import com.digitalkoi.speechtotext.drawing.DrawActivity
+import com.digitalkoi.speechtotext.mvi.drawing.DrawActivity
 import com.digitalkoi.speechtotext.mvi.MviView
-import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.*
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.InitialIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.PausePressedIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.PlayPressedIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowDialogConfirmIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowDialogGoodnessIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowDialogIdIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ShowKeyboardIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.StopPressedIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ZoomInIntent
+import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.ZoomOutIntent
 import com.digitalkoi.speechtotext.util.Constants
 import com.digitalkoi.speechtotext.util.ViewModelFactory
 import com.hsalf.smilerating.SmileRating
@@ -39,7 +46,15 @@ import com.tbruyelle.rxpermissions2.RxPermissions
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
-import kotlinx.android.synthetic.main.speech_frag.*
+import kotlinx.android.synthetic.main.speech_frag.scrollView
+import kotlinx.android.synthetic.main.speech_frag.speechGoodnessBt
+import kotlinx.android.synthetic.main.speech_frag.speechKeyboardBt
+import kotlinx.android.synthetic.main.speech_frag.speechMinusBt
+import kotlinx.android.synthetic.main.speech_frag.speechPaintBt
+import kotlinx.android.synthetic.main.speech_frag.speechPlayBt
+import kotlinx.android.synthetic.main.speech_frag.speechPlusBt
+import kotlinx.android.synthetic.main.speech_frag.speechQuestionBt
+import kotlinx.android.synthetic.main.speech_frag.speechTextField
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.Unregistrar
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
@@ -70,23 +85,40 @@ class SpeechFragment : Fragment(),
   private val showDialogGoodnessSubject = PublishSubject.create<ShowDialogGoodnessIntent>()
   private val showKeyboardSubject = PublishSubject.create<ShowKeyboardIntent>()
 
+  private fun initialIntent(): Observable<InitialIntent> = Observable.just(InitialIntent)
+  private fun playPressedIntent(): Observable<PlayPressedIntent> = playPressedSubject
+  private fun stopPressedIntent(): Observable<StopPressedIntent> = stopPressedSubject
+  private fun pausePressedIntent(): Observable<PausePressedIntent> = pausePressedSubject
+  private fun zoomInIntent(): Observable<ZoomInIntent> = zoomInSubject
+  private fun zoomOutIntent(): Observable<ZoomOutIntent> = zoomOutSubject
+  private fun showDialogIdIntent(): Observable<ShowDialogIdIntent> = showDialogIdSubject
+  private fun showDialogConfirmIntent(): Observable<ShowDialogConfirmIntent> = showDialogConfirmSubject
+
+  private fun showDialogGoodnessIntent(): Observable<ShowDialogGoodnessIntent> = showDialogGoodnessSubject
+  private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
+
   private val builder: AlertDialog.Builder by lazy { AlertDialog.Builder(activity) }
   private val dialogId: AlertDialog by lazy { builder.create() }
   private val dialogConfirm: AlertDialog by lazy { builder.create() }
   private val dialogGoodness: AlertDialog by lazy { builder.create() }
   private lateinit var unregistrar: Unregistrar
-  private val audioManager: AudioManager by lazy { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
-  private val currentVolume: Int by lazy { audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) }
+  private val audioManager: AudioManager by lazy {
+    context.getSystemService(
+        Context.AUDIO_SERVICE
+    ) as AudioManager
+  }
 
   private var recSpeechStatus: Int? = null
+  private var recSpeechStatusLocal = false
   private var keyboardIsOpen = false
   private var idPatient: String? = null
+  private var idPatientLocal = ""
   private var textCurrent: String? = null
   private var textPreviously: String? = null
+  private var closeFragment = false
 
-
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-    //vector drawables support for API lower than 21
+  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?)
+      : View? {
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     return inflater?.inflate(layout.speech_frag, container, false)
   }
@@ -99,15 +131,17 @@ class SpeechFragment : Fragment(),
   override fun onPause() {
     super.onPause()
     showKeyboard(false)
+    if (recSpeechStatus == Constants.REC_STATUS_PLAY) {
+      pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_PAUSE))
+    }
+    showDialogs(false, false, false)
+    closeFragment = false
   }
 
   override fun onDestroy() {
     super.onDestroy()
     disposable.dispose()
     unregistrar.unregister()
-    if (recSpeechStatus == Constants.REC_STATUS_PLAY)
-      pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_ROTATION))
-    showDialogs(false, false, false)
   }
 
   override fun intents(): Observable<SpeechIntent> {
@@ -123,15 +157,11 @@ class SpeechFragment : Fragment(),
             showDialogConfirmIntent(),
             showDialogGoodnessIntent(),
             showKeyboardIntent()
-            )
+        )
     )
   }
 
-  @SuppressLint("LogNotTimber")
   override fun render(state: SpeechViewState) {
-    recSpeechStatus = state.recSpeechStatus
-    idPatient = state.idPatient
-    //TODO: move logic to holder
     if (!TextUtils.isEmpty(state.text) && !textPreviously.equals(state.text!!)) {
       textPreviously = state.text
       if (TextUtils.isEmpty(textCurrent)) {
@@ -143,28 +173,22 @@ class SpeechFragment : Fragment(),
         scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
       }
     }
-
     if (state.error != null) {
       val error = state.error.toString()
-      when (error) {
-        SpeechRecognizer.ERROR_NO_MATCH.toString() -> showToast("No recognition result matched")
-      }
-      Log.e("error", state.error.toString())
-      showToast(state.error.toString())
+      Log.e("error", error)
     }
-
     speechTextField.textSize = state.fontSize
-
     if (state.showDialogId || state.showDialogConfirmation || state.showDialogGoodness) {
       showDialogs(state.showDialogId, state.showDialogConfirmation, state.showDialogGoodness)
-    } else { showDialogs(false, false, false)    }
-
+    } else {
+      showDialogs(false, false, false)
+    }
     if (keyboardIsOpen != state.showKeyboard) {
       keyboardIsOpen = state.showKeyboard
       showKeyboard(keyboardIsOpen)
     }
-
-    Log.d("Fragment: ", state.toString())
+    recSpeechStatus = state.recSpeechStatus
+    if (!TextUtils.isEmpty(state.idPatient)) idPatient = state.idPatient
   }
 
   private fun bind() {
@@ -174,64 +198,76 @@ class SpeechFragment : Fragment(),
     disposable.add(viewModel.states().subscribe(this::render))
     viewModel.processIntents(intents())
     initialClickListeners()
-    //TODO: null
-    if (recSpeechStatus != null && recSpeechStatus == Constants.REC_STATUS_ROTATION) {
-      playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
-      changeIconPlayButton(Constants.REC_STATUS_PLAY)
-    }
-    unregistrar = KeyboardVisibilityEvent.registerEventListener(
-        activity, { if (!it) { showKeyboardSubject.onNext(ShowKeyboardIntent(false)) }}
-    )
+
+    unregistrar = KeyboardVisibilityEvent
+        .registerEventListener(activity, {
+          if (!it) { showKeyboardSubject.onNext(ShowKeyboardIntent(false))  } } )
+    if (recSpeechStatus == Constants.REC_STATUS_PAUSE) {
+        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+        changeIconPlayButton(Constants.REC_STATUS_PLAY)
+      }
+//    if (!TextUtils.isEmpty(idPatientLocal))
+//      playPressedSubject.onNext(PlayPressedIntent(idPatientLocal))
   }
 
-  private fun initialIntent(): Observable<InitialIntent> = Observable.just(InitialIntent)
-  private fun playPressedIntent(): Observable<PlayPressedIntent> = playPressedSubject
-  private fun stopPressedIntent(): Observable<StopPressedIntent> = stopPressedSubject
-  private fun pausePressedIntent(): Observable<PausePressedIntent> = pausePressedSubject
-  private fun zoomInIntent(): Observable<ZoomInIntent> = zoomInSubject
-  private fun zoomOutIntent(): Observable<ZoomOutIntent> = zoomOutSubject
-  private fun showDialogIdIntent(): Observable<ShowDialogIdIntent> = showDialogIdSubject
-  private fun showDialogConfirmIntent(): Observable<ShowDialogConfirmIntent> = showDialogConfirmSubject
-  private fun showDialogGoodnessIntent(): Observable<ShowDialogGoodnessIntent> = showDialogGoodnessSubject
-  private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
-
   private fun initialClickListeners() {
-    speechMicPlay.setOnClickListener {
-      when (recSpeechStatus!!) {
-        Constants.REC_STATUS_STOP -> {
-          checkPermissions()
-          }
-        Constants.REC_STATUS_PLAY -> {
-          pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_PAUSE))
-          changeIconPlayButton(Constants.REC_STATUS_PAUSE)
-        }
-        Constants.REC_STATUS_PAUSE -> {
-          checkPermissions()
-        }
-      }
-    }
-    speechStopBt.setOnClickListener {
-      if  (Constants.REC_STATUS_STOP != recSpeechStatus!!) {
-        stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString()))
-        changeIconPlayButton(Constants.REC_STATUS_STOP)
-        speechTextField.text = Editable.Factory.getInstance().newEditable("")
-        textCurrent = ""
-        textPreviously = ""
-        restoreVolumeLevel()
-      }
-    }
     speechPlusBt.setOnClickListener { zoomInSubject.onNext(ZoomInIntent) }
     speechMinusBt.setOnClickListener { zoomOutSubject.onNext(ZoomOutIntent) }
     speechPaintBt.setOnClickListener { showDrawActivity() }
-    speechGoodnessBt.setOnClickListener { showDialogGoodnessSubject.onNext(ShowDialogGoodnessIntent(true)) }
-    speechQuestionBt.setOnClickListener { showDialogConfirmSubject.onNext(ShowDialogConfirmIntent(true)) }
-    speechKeyboardBt.setOnClickListener { showKeyboardSubject.onNext(ShowKeyboardIntent(!keyboardIsOpen)) }
+    speechGoodnessBt.setOnClickListener {
+      showDialogGoodnessSubject.onNext(
+          ShowDialogGoodnessIntent(true)
+      )
+    }
+    speechQuestionBt.setOnClickListener {
+      showDialogConfirmSubject.onNext(
+          ShowDialogConfirmIntent(true)
+      )
+    }
+    speechKeyboardBt.setOnClickListener {
+      showKeyboardSubject.onNext(
+          ShowKeyboardIntent(!keyboardIsOpen)
+      )
+    }
+    speechPlayBt.setOnClickListener {
+      when (recSpeechStatus!!) {
+        Constants.REC_STATUS_STOP ->
+          if (!recSpeechStatusLocal) {
+            recSpeechStatusLocal = true
+            checkPermissions()
+          } else {
+            recSpeechStatusLocal = false
+            idPatientLocal = ""
+            stopPressedSubject.onNext(
+                StopPressedIntent(idPatient!!, speechTextField.text.toString())
+            )
+            idPatient = null
+            changeIconPlayButton(Constants.REC_STATUS_STOP)
+          }
+        Constants.REC_STATUS_PLAY -> {
+          recSpeechStatusLocal = false
+          stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString()))
+          changeIconPlayButton(Constants.REC_STATUS_STOP)
+          speechTextField.text = Editable.Factory.getInstance()
+              .newEditable("")
+          idPatient = null
+          idPatientLocal = ""
+          textCurrent = ""
+          textPreviously = ""
+          restoreVolumeLevel()
+        }
+      }
+    }
   }
 
   private fun changeIconPlayButton(status: Int) {
     when (status) {
-      Constants.REC_STATUS_PLAY -> speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_pause_button))
-      else -> speechMicPlay.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.shape_play_button))
+      Constants.REC_STATUS_PLAY -> speechPlayBt.setImageDrawable(
+          ContextCompat.getDrawable(context, R.drawable.ic_stop)
+      )
+      else -> speechPlayBt.setImageDrawable(
+          ContextCompat.getDrawable(context, R.drawable.shape_play_button)
+      )
     }
   }
 
@@ -244,14 +280,16 @@ class SpeechFragment : Fragment(),
     val dialogPatientOk = view.findViewById<View>(R.id.dialogPatientOk)
     val dialogPatientCancel = view.findViewById<View>(R.id.dialogPatientCancel)
     val dialogPatientIdEdit = view.findViewById<EditText>(R.id.dialogPatientIdEd)
-    
+
     TextKeyListener.clear(dialogPatientIdEdit.text)
     dialogPatientOk.setOnClickListener {
       if (TextUtils.isEmpty(dialogPatientIdEdit.text.toString())) {
         showToast("Input patient ID please")
       } else {
         muteBeep()
-        playPressedSubject.onNext(PlayPressedIntent(dialogPatientIdEdit.text.toString()))
+        idPatient = dialogPatientIdEdit.text.toString()
+        idPatientLocal = idPatient!!
+        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
         showDialogIdSubject.onNext(ShowDialogIdIntent(false))
         changeIconPlayButton(Constants.REC_STATUS_PLAY)
       }
@@ -273,6 +311,8 @@ class SpeechFragment : Fragment(),
     dialogConfirmYes.setOnClickListener {
       showDialogConfirmSubject.onNext(ShowDialogConfirmIntent(false))
       dialogConfirm.dismiss()
+      if (!closeFragment && (recSpeechStatus!! == Constants.REC_STATUS_PAUSE) && !TextUtils.isEmpty(idPatient))
+        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
     }
   }
 
@@ -284,21 +324,36 @@ class SpeechFragment : Fragment(),
 
     val dialogGoodness = view.findViewById<SmileRating>(R.id.smile_rating)
     dialogGoodness.setOnSmileySelectionListener { smiley, reselected ->
-      if (reselected) showDialogGoodnessSubject.onNext(ShowDialogGoodnessIntent(false))
+      if (reselected) {
+        showDialogGoodnessSubject.onNext(ShowDialogGoodnessIntent(false))
+        if (!closeFragment && (recSpeechStatus!! == Constants.REC_STATUS_PAUSE) && !TextUtils.isEmpty(idPatient))
+          playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+      }
     }
   }
 
-  private fun showDialogs(showDialogId: Boolean, showDialogConfirm: Boolean, showDialogGoodness: Boolean) =
-    when {
+  private fun showDialogs(
+    showDialogId: Boolean,
+    showDialogConfirm: Boolean,
+    showDialogGoodness: Boolean
+  ) {
+    return when {
       showDialogId -> dialogId.show()
-      showDialogConfirm -> dialogConfirm.show()
-      showDialogGoodness ->dialogGoodness.show()
+      showDialogConfirm -> {
+        dialogConfirm.show()
+        callPauseRecord()
+      }
+      showDialogGoodness -> {
+        dialogGoodness.show()
+        callPauseRecord()
+      }
       else -> {
         dialogId.dismiss()
         dialogConfirm.dismiss()
         dialogGoodness.dismiss()
       }
     }
+  }
 
   private fun showKeyboard(show: Boolean) {
     if (show) {
@@ -307,18 +362,29 @@ class SpeechFragment : Fragment(),
       speechTextField.isFocusableInTouchMode = true
       speechTextField.requestFocus()
       UIUtil.showKeyboard(activity, speechTextField)
+      speechTextField.setSelection(speechTextField.text.length)
+      if (recSpeechStatus!! == Constants.REC_STATUS_PLAY) callPauseRecord()
 
     } else {
       UIUtil.hideKeyboard(activity)
       speechTextField.isClickable = false
       speechTextField.isFocusable = false
       speechTextField.isFocusableInTouchMode = false
+      if (!closeFragment && recSpeechStatus!! == Constants.REC_STATUS_PAUSE) {
+        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+      }
     }
   }
 
   private fun showDrawActivity() {
-    val intent = Intent(context, DrawActivity::class.java)
-    startActivity(intent)
+    closeFragment = true
+    callPauseRecord()
+    startActivity(Intent(context, DrawActivity::class.java))
+  }
+
+  private fun callPauseRecord() {
+    if (recSpeechStatus!! == Constants.REC_STATUS_PLAY)
+      pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_PAUSE))
   }
 
   private fun showToast(error: String) =
@@ -326,28 +392,33 @@ class SpeechFragment : Fragment(),
 
   private fun checkPermissions() =
     rxPermissions.request(permission.RECORD_AUDIO, permission.WRITE_EXTERNAL_STORAGE)
-            .subscribe { granted ->
-                if (!granted) {
-                  Toast.makeText(activity, getString(string.permissions), Toast.LENGTH_LONG).show()
-                } else {
-                  muteBeep()
-                    when (recSpeechStatus) {
-                      Constants.REC_STATUS_STOP -> {
-                        showDialogIdSubject.onNext(ShowDialogIdIntent(true))
-                      }
-                      Constants.REC_STATUS_PAUSE -> {
-                        playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
-                        changeIconPlayButton(Constants.REC_STATUS_PLAY)
-                      }
-                    }
-                }
+        .subscribe { granted ->
+          if (!granted) {
+            Toast.makeText(activity, getString(string.permissions), Toast.LENGTH_LONG)
+                .show()
+          } else {
+            muteBeep()
+            when (recSpeechStatus) {
+              Constants.REC_STATUS_STOP -> {
+                showDialogIdSubject.onNext(ShowDialogIdIntent(true))
+              }
+              Constants.REC_STATUS_PAUSE -> {
+                playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+                changeIconPlayButton(Constants.REC_STATUS_PLAY)
+              }
             }
+          }
+        }
 
   private fun muteBeep() =
-    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
-
-  private fun restoreVolumeLevel() =
-    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume,
+    audioManager.setStreamVolume(
+        AudioManager.STREAM_MUSIC,
+        0,
         AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
 
+  private fun restoreVolumeLevel() =
+    audioManager.setStreamVolume(
+        AudioManager.STREAM_MUSIC,
+        7,
+        AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE)
 }

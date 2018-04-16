@@ -17,9 +17,7 @@ class Constants {
     const val REC_STATUS_STOP = 0
     const val REC_STATUS_PLAY = 1
     const val REC_STATUS_PAUSE = 2
-    const val REC_STATUS_ROTATION = 3
 
     const val ARGUMENT_ITEM_ID = "patient_id"
-    const val PATIENT_TEXT = "patient_text"
   }
 }

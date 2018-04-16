@@ -9,6 +9,6 @@ import com.digitalkoi.speechtotext.mvi.mvibase.MviIntent
 sealed class HistoryIntent : MviIntent {
 
   object InitialIntent : HistoryIntent()
-
-  data class ShowDateIntent(val date: String) : HistoryIntent()
+  data class UpdateListIntent(val date: String) : HistoryIntent()
+  data class ShowDataPickerIntent(val showDataPickerDialog: Boolean) : HistoryIntent()
 }

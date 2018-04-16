@@ -9,6 +9,6 @@ import com.digitalkoi.speechtotext.mvi.mvibase.MviIntent
 
 sealed class DetailIntent : MviIntent {
   data class InitialIntent(val id: String) : DetailIntent()
-  data class EditIntent(val item: CSVConversation) : DetailIntent()
+  data class SaveIntent(val item: CSVConversation) : DetailIntent()
   data class DeleteIntent(val item: CSVConversation) : DetailIntent()
 }

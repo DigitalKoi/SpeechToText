@@ -3,6 +3,10 @@
 
   <item
       android:id="@+id/menu_history"
-      android:title="@string/history"/>
+      android:title="@string/history_item"/>
+
+  <item
+    android:id="@+id/menu_about"
+    android:title="@string/about_item" />
 
 </menu>

@@ -7,8 +7,7 @@ import com.digitalkoi.speechtotext.mvi.MviAction
  */
 
 sealed class HistoryAction : MviAction {
-
   object InitialAction : HistoryAction()
-
-  data class ShowDialogDateAction(val date: String) : HistoryAction()
+  data class UpdateListAction(val date: String) : HistoryAction()
+  data class ShowDataPickerAction(val showDataPickerAction: Boolean) : HistoryAction()
 }
