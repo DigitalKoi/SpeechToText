@@ -168,7 +168,7 @@ class SpeechFragment : Fragment(),
         textCurrent = state.text
         speechTextField.setText(textCurrent, EDITABLE)
       } else {
-        textCurrent += "; " + state.text
+        textCurrent = speechTextField.text.toString() + "  " + state.text
         speechTextField.setText(textCurrent, EDITABLE)
         scrollView.post { scrollView.fullScroll(ScrollView.FOCUS_DOWN) }
       }
@@ -233,14 +233,11 @@ class SpeechFragment : Fragment(),
       when (recSpeechStatus!!) {
         Constants.REC_STATUS_STOP ->
           if (!recSpeechStatusLocal) {
-            recSpeechStatusLocal = true
             checkPermissions()
           } else {
             recSpeechStatusLocal = false
             idPatientLocal = ""
-            stopPressedSubject.onNext(
-                StopPressedIntent(idPatient!!, speechTextField.text.toString())
-            )
+            stopPressedSubject.onNext(StopPressedIntent(idPatient!!, speechTextField.text.toString()))
             idPatient = null
             changeIconPlayButton(Constants.REC_STATUS_STOP)
           }
@@ -252,7 +249,6 @@ class SpeechFragment : Fragment(),
               .newEditable("")
           idPatient = null
           idPatientLocal = ""
-          textCurrent = ""
           textPreviously = ""
           restoreVolumeLevel()
         }
@@ -289,6 +285,7 @@ class SpeechFragment : Fragment(),
         muteBeep()
         idPatient = dialogPatientIdEdit.text.toString()
         idPatientLocal = idPatient!!
+        recSpeechStatusLocal = true
         playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
         showDialogIdSubject.onNext(ShowDialogIdIntent(false))
         changeIconPlayButton(Constants.REC_STATUS_PLAY)
@@ -296,6 +293,7 @@ class SpeechFragment : Fragment(),
     }
     dialogPatientCancel.setOnClickListener {
       showDialogIdSubject.onNext(ShowDialogIdIntent(false))
+      recSpeechStatusLocal = false
     }
   }
 
@@ -370,6 +368,8 @@ class SpeechFragment : Fragment(),
       speechTextField.isClickable = false
       speechTextField.isFocusable = false
       speechTextField.isFocusableInTouchMode = false
+      textCurrent = speechTextField.text.toString()
+//      textPreviously = ""
       if (!closeFragment && recSpeechStatus!! == Constants.REC_STATUS_PAUSE) {
         playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
       }
@@ -400,10 +400,12 @@ class SpeechFragment : Fragment(),
             muteBeep()
             when (recSpeechStatus) {
               Constants.REC_STATUS_STOP -> {
+                textCurrent = ""
                 showDialogIdSubject.onNext(ShowDialogIdIntent(true))
               }
               Constants.REC_STATUS_PAUSE -> {
                 playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
+                recSpeechStatusLocal = true
                 changeIconPlayButton(Constants.REC_STATUS_PLAY)
               }
             }
