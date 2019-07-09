@@ -1,6 +1,6 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
-import com.digitalkoi.speechtotext.mvi.MviResult
+import com.digitalkoi.speechtotext.mvi.base.MviResult
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.

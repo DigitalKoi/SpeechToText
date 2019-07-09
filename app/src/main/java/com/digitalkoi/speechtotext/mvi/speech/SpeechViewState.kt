@@ -1,6 +1,6 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
-import com.digitalkoi.speechtotext.mvi.MviViewState
+import com.digitalkoi.speechtotext.mvi.base.MviViewState
 import com.digitalkoi.speechtotext.util.Constants
 
 /**

@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.detail
 
 import com.digitalkoi.speechtotext.data.file.CSVConversation
-import com.digitalkoi.speechtotext.mvi.mvibase.MviIntent
+import com.digitalkoi.speechtotext.mvi.base.MviIntent
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 10/04/18.

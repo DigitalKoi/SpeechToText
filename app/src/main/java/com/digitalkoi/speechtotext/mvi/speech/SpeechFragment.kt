@@ -1,6 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
 import android.Manifest.permission
+import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
@@ -28,7 +29,7 @@ import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.R.layout
 import com.digitalkoi.speechtotext.R.string
 import com.digitalkoi.speechtotext.mvi.drawing.DrawActivity
-import com.digitalkoi.speechtotext.mvi.MviView
+import com.digitalkoi.speechtotext.mvi.base.MviView
 import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.InitialIntent
 import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.PausePressedIntent
 import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.PlayPressedIntent
@@ -65,7 +66,7 @@ import kotlin.LazyThreadSafetyMode.NONE
  */
 
 class SpeechFragment : Fragment(),
-    MviView<SpeechIntent, SpeechViewState> {
+        MviView<SpeechIntent, SpeechViewState> {
 
   private val disposable = CompositeDisposable()
   private val viewModel: SpeechViewModel by lazy(NONE) {
@@ -73,7 +74,7 @@ class SpeechFragment : Fragment(),
         .of(this, ViewModelFactory.getInstance(activity!!))
         .get(SpeechViewModel::class.java)
   }
-  private val rxPermissions: RxPermissions by lazy { RxPermissions(activity) }
+  private val rxPermissions: RxPermissions by lazy { RxPermissions(activity as Activity) }
 
   private val playPressedSubject = PublishSubject.create<PlayPressedIntent>()
   private val stopPressedSubject = PublishSubject.create<StopPressedIntent>()
@@ -97,13 +98,13 @@ class SpeechFragment : Fragment(),
   private fun showDialogGoodnessIntent(): Observable<ShowDialogGoodnessIntent> = showDialogGoodnessSubject
   private fun showKeyboardIntent(): Observable<ShowKeyboardIntent> = showKeyboardSubject
 
-  private val builder: AlertDialog.Builder by lazy { AlertDialog.Builder(activity) }
+  private val builder: AlertDialog.Builder by lazy { AlertDialog.Builder(context!!) }
   private val dialogId: AlertDialog by lazy { builder.create() }
   private val dialogConfirm: AlertDialog by lazy { builder.create() }
   private val dialogGoodness: AlertDialog by lazy { builder.create() }
   private lateinit var unregistrar: Unregistrar
   private val audioManager: AudioManager by lazy {
-    context.getSystemService(
+    context?.getSystemService(
         Context.AUDIO_SERVICE
     ) as AudioManager
   }
@@ -117,13 +118,12 @@ class SpeechFragment : Fragment(),
   private var textPreviously: String? = null
   private var closeFragment = false
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?)
-      : View? {
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-    return inflater?.inflate(layout.speech_frag, container, false)
+    return inflater.inflate(layout.speech_frag, container, false)
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     bind()
   }
@@ -134,7 +134,7 @@ class SpeechFragment : Fragment(),
     if (recSpeechStatus == Constants.REC_STATUS_PLAY) {
       pausePressedSubject.onNext(PausePressedIntent(Constants.REC_STATUS_PAUSE))
     }
-    showDialogs(false, false, false)
+    showDialogs(showDialogId = false, showDialogConfirm = false, showDialogGoodness = false)
     closeFragment = false
   }
 
@@ -175,7 +175,6 @@ class SpeechFragment : Fragment(),
     }
     if (state.error != null) {
       val error = state.error.toString()
-      Log.e("error", error)
     }
     speechTextField.textSize = state.fontSize
     if (state.showDialogId || state.showDialogConfirmation || state.showDialogGoodness) {
@@ -200,8 +199,8 @@ class SpeechFragment : Fragment(),
     initialClickListeners()
 
     unregistrar = KeyboardVisibilityEvent
-        .registerEventListener(activity, {
-          if (!it) { showKeyboardSubject.onNext(ShowKeyboardIntent(false))  } } )
+        .registerEventListener(activity) {
+          if (!it) { showKeyboardSubject.onNext(ShowKeyboardIntent(false))  } }
     if (recSpeechStatus == Constants.REC_STATUS_PAUSE) {
         playPressedSubject.onNext(PlayPressedIntent(idPatient!!))
         changeIconPlayButton(Constants.REC_STATUS_PLAY)
@@ -257,18 +256,20 @@ class SpeechFragment : Fragment(),
   }
 
   private fun changeIconPlayButton(status: Int) {
-    when (status) {
-      Constants.REC_STATUS_PLAY -> speechPlayBt.setImageDrawable(
-          ContextCompat.getDrawable(context, R.drawable.ic_stop)
-      )
-      else -> speechPlayBt.setImageDrawable(
-          ContextCompat.getDrawable(context, R.drawable.shape_play_button)
-      )
+    context?.also {
+      when (status) {
+        Constants.REC_STATUS_PLAY -> speechPlayBt.setImageDrawable(
+                ContextCompat.getDrawable(it, R.drawable.ic_stop)
+        )
+        else -> speechPlayBt.setImageDrawable(
+                ContextCompat.getDrawable(it, R.drawable.shape_play_button)
+        )
+      }
     }
   }
 
   private fun initialDialogId() {
-    val view = layoutInflater.inflate(R.layout.dialog_patient_id, null)
+    val view = layoutInflater.inflate(layout.dialog_patient_id, null)
     builder.setView(view)
     dialogId.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     dialogId.setCancelable(false)
@@ -298,7 +299,7 @@ class SpeechFragment : Fragment(),
   }
 
   private fun initialDialogConfirm() {
-    val view = layoutInflater.inflate(R.layout.dialog_confirmation, null)
+    val view = layoutInflater.inflate(layout.dialog_confirmation, null)
     builder.setView(view)
     dialogConfirm.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     val windowManager = dialogConfirm.window.attributes
@@ -315,7 +316,7 @@ class SpeechFragment : Fragment(),
   }
 
   private fun initialDialogGoodness() {
-    val view = layoutInflater.inflate(R.layout.dialog_goodness, null)
+    val view = layoutInflater.inflate(layout.dialog_goodness, null)
     builder.setView(view)
     dialogGoodness.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     dialogGoodness.setCancelable(false)

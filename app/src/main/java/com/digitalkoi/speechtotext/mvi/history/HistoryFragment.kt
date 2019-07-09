@@ -1,11 +1,13 @@
 package com.digitalkoi.speechtotext.mvi.history
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatDelegate
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -14,7 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.data.file.CSVConversation
-import com.digitalkoi.speechtotext.mvi.MviView
+import com.digitalkoi.speechtotext.mvi.base.MviView
 import com.digitalkoi.speechtotext.mvi.detail.DetailActivity
 import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.InitialIntent
 import com.digitalkoi.speechtotext.mvi.history.HistoryIntent.ShowDataPickerIntent
@@ -56,20 +58,13 @@ class HistoryFragment : Fragment(), MviView<HistoryIntent, HistoryViewState> {
   private var showTime: Boolean = false
   private var datePicker: String = ""
 
-  override fun onCreateView(
-    inflater: LayoutInflater?,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     setHasOptionsMenu(true)
-    return inflater?.inflate(R.layout.history_frag, container, false)
+    return inflater.inflate(R.layout.history_frag, container, false)
   }
 
-  override fun onViewCreated(
-    view: View?,
-    savedInstanceState: Bundle?
-  ) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     bind()
   }
@@ -99,12 +94,12 @@ class HistoryFragment : Fragment(), MviView<HistoryIntent, HistoryViewState> {
   }
 
   override fun render(state: HistoryViewState) {
-    if (!datePicker.equals(state.date)) {
+    if (!TextUtils.equals(datePicker, state.date)) {
       datePicker = state.date
       updatedListSubject.onNext(UpdateListIntent(datePicker))
     }
     if (state.dataList != null) {
-      list = state.dataList!!
+      list = state.dataList
       showList(list)
     }
   }
@@ -131,7 +126,7 @@ class HistoryFragment : Fragment(), MviView<HistoryIntent, HistoryViewState> {
       val day = calendar.get(Calendar.DAY_OF_MONTH)
       val dataPickerDialog =
         DatePickerDialog(
-            activity, DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+            activity as Activity, DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
           run {
             val newDate = Calendar.getInstance()
             newDate.set(year, monthOfYear, dayOfMonth)

@@ -14,7 +14,7 @@ import android.widget.TextView.BufferType.EDITABLE
 import android.widget.Toast
 import com.digitalkoi.speechtotext.R
 import com.digitalkoi.speechtotext.data.file.CSVConversation
-import com.digitalkoi.speechtotext.mvi.MviView
+import com.digitalkoi.speechtotext.mvi.base.MviView
 import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.DeleteIntent
 import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.InitialIntent
 import com.digitalkoi.speechtotext.mvi.detail.DetailIntent.SaveIntent
@@ -47,14 +47,13 @@ class DetailFragment : Fragment(), MviView<DetailIntent, DetailViewState> {
   private fun saveIntent(): Observable<SaveIntent> = savePressedSubject
   private fun deleteIntent(): Observable<DeleteIntent> = deletePressedSubject
 
-  override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?)
-      : View? {
+  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     setHasOptionsMenu(true)
-    return inflater?.inflate(R.layout.detail_frag, container, false)
+    return inflater.inflate(R.layout.detail_frag, container, false)
   }
 
-  override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     bind()
   }
@@ -81,7 +80,7 @@ class DetailFragment : Fragment(), MviView<DetailIntent, DetailViewState> {
 
   override fun render(state: DetailViewState) {
     if (state.item != null) {
-      item = state.item!!
+      item = state.item
       setTextToFields()
     }
   }
@@ -128,12 +127,12 @@ class DetailFragment : Fragment(), MviView<DetailIntent, DetailViewState> {
     when (item!!.itemId) {
       R.id.menu_edit -> allowEditing(true)
       R.id.menu_delete -> {
-        activity.finish()
+        activity?.finish()
         deletePressedSubject.onNext(DeleteIntent(this.item!!))
         showToast("Item was deleted")
       }
       R.id.menu_save -> {
-        activity.finish()
+        activity?.finish()
         saveItemToFile()
         showToast("Item was edited")
       }

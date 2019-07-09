@@ -1,6 +1,6 @@
 package com.digitalkoi.speechtotext.mvi.history
 
-import com.digitalkoi.speechtotext.mvi.mvibase.MviIntent
+import com.digitalkoi.speechtotext.mvi.base.MviIntent
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 24/03/18.

@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.speech
 
 import android.arch.lifecycle.ViewModel
-import com.digitalkoi.speechtotext.mvi.MviViewModel
+import com.digitalkoi.speechtotext.mvi.base.MviViewModel
 import com.digitalkoi.speechtotext.mvi.speech.SpeechAction.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechIntent.*
 import com.digitalkoi.speechtotext.mvi.speech.SpeechResult.*
@@ -35,8 +35,8 @@ class SpeechViewModel(
     get() = ObservableTransformer { intents ->
       intents.publish { shared ->
         Observable.merge(
-            shared.ofType(SpeechIntent.InitialIntent::class.java).take(1),
-            shared.notOfType(SpeechIntent.InitialIntent::class.java)
+            shared.ofType(InitialIntent::class.java).take(1),
+            shared.notOfType(InitialIntent::class.java)
         )
       }
     }
@@ -58,12 +58,12 @@ class SpeechViewModel(
       is PlayPressedIntent -> PlayPressedAction(intent.patientId)
       is StopPressedIntent -> StopPressedAction(intent.id, intent.text)
       is PausePressedIntent -> PausePressedAction(intent.status)
-      is ZoomInIntent -> SpeechAction.FontSizeInAction
-      is ZoomOutIntent -> SpeechAction.FontSizeOutAction
-      is ShowDialogIdIntent -> SpeechAction.ShowDialogIdAction(intent.showView)
-      is ShowDialogConfirmIntent -> SpeechAction.ShowDialogConfirmAction(intent.showView)
-      is ShowDialogGoodnessIntent -> SpeechAction.ShowDialogGoodnessAction(intent.showView)
-      is ShowKeyboardIntent -> SpeechAction.ShowKeyboardAction(intent.showView)
+      is ZoomInIntent -> FontSizeInAction
+      is ZoomOutIntent -> FontSizeOutAction
+      is ShowDialogIdIntent -> ShowDialogIdAction(intent.showView)
+      is ShowDialogConfirmIntent -> ShowDialogConfirmAction(intent.showView)
+      is ShowDialogGoodnessIntent -> ShowDialogGoodnessAction(intent.showView)
+      is ShowKeyboardIntent -> ShowKeyboardAction(intent.showView)
     }
   }
 

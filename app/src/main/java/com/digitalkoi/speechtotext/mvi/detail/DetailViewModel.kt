@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.detail
 
 import android.arch.lifecycle.ViewModel
-import com.digitalkoi.speechtotext.mvi.MviViewModel
+import com.digitalkoi.speechtotext.mvi.base.MviViewModel
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.DeleteAction
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.SaveAction
 import com.digitalkoi.speechtotext.mvi.detail.DetailAction.PopulatelAction

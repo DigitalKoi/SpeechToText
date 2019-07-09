@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.history
 
 import android.arch.lifecycle.ViewModel
-import com.digitalkoi.speechtotext.mvi.MviViewModel
+import com.digitalkoi.speechtotext.mvi.base.MviViewModel
 import com.digitalkoi.speechtotext.mvi.history.HistoryAction.InitialAction
 import com.digitalkoi.speechtotext.mvi.history.HistoryAction.ShowDataPickerAction
 import com.digitalkoi.speechtotext.mvi.history.HistoryAction.UpdateListAction
@@ -16,7 +16,6 @@ import com.digitalkoi.speechtotext.mvi.history.HistoryResult.UpdateListResult
 import io.reactivex.Observable
 import io.reactivex.ObservableTransformer
 import io.reactivex.functions.BiFunction
-import io.reactivex.rxkotlin.ofType
 import io.reactivex.subjects.PublishSubject
 
 /**

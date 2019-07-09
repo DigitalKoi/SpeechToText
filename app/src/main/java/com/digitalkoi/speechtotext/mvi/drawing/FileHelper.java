@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import timber.log.Timber;
+
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 14/03/18.
  */
@@ -56,14 +58,14 @@ class FileHelper {
         os.close();
         fos.close();
       } catch (Exception e) {
-        e.printStackTrace();
+        Timber.e(e);
 
         if (fos != null) {
 
           try {
             fos.close();
           } catch (Exception e1) {
-            e1.printStackTrace();
+            Timber.e(e1);
           }
         }
       }
@@ -99,14 +101,14 @@ class FileHelper {
           runOnUiThread(() -> mListener.onStateExtracted(state));
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        Timber.e(e);
 
         if (fis != null) {
 
           try {
             fis.close();
           } catch (Exception e1) {
-            e1.printStackTrace();
+            Timber.e(e1);
           }
         }
 
@@ -150,14 +152,14 @@ class FileHelper {
           runOnUiThread(mListener::onStateSaved);
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        Timber.e(e);
 
         if (fos != null) {
 
           try {
             fos.close();
           } catch (Exception e1) {
-            e1.printStackTrace();
+            Timber.e(e1);
           }
         }
 

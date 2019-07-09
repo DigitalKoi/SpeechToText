@@ -7,6 +7,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 
+
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.
  */

@@ -1,4 +1,4 @@
-package com.digitalkoi.speechtotext.mvi
+package com.digitalkoi.speechtotext.mvi.base
 
 /**
  * @author Taras Zhupnyk (akka DigitalKoi) on 09/03/18.

@@ -1,6 +1,5 @@
-package com.digitalkoi.speechtotext.mvi
+package com.digitalkoi.speechtotext.mvi.base
 
-import com.digitalkoi.speechtotext.mvi.mvibase.MviIntent
 import io.reactivex.Observable
 
 /**

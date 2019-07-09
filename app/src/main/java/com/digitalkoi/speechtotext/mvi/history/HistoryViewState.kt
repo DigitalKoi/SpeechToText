@@ -1,7 +1,7 @@
 package com.digitalkoi.speechtotext.mvi.history
 
 import com.digitalkoi.speechtotext.data.file.CSVConversation
-import com.digitalkoi.speechtotext.mvi.MviViewState
+import com.digitalkoi.speechtotext.mvi.base.MviViewState
 import com.digitalkoi.speechtotext.util.Constants
 
 /**

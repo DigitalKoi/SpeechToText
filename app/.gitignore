@@ -1,1 +1,11 @@
-/build
+.gradle
+*.properties
+.DS_Store
+build
+/captures
+.idea
+*.txt
+*.apk
+*.iml
+!gradle-wrapper.properties
+!gradle.propertiese.properties
